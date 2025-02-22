@@ -1,1 +1,86 @@
-<p>register works!</p>
+<span class="register-title">
+  <mat-icon matPrefix aria-label="register with avatar">account_box-outlined</mat-icon>
+  <h2> Register </h2>
+</span>
+
+
+<!--form div-->
+<div class="form">
+  <!--  form initiation and setup -->
+  <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+    <!-- Name  field-->
+    <mat-form-field >
+      <mat-label>Name</mat-label>
+      <input matInput formControlName="name" >
+      @if (hasDisplableError('name')) {
+        <mat-error>Name is required</mat-error>}
+    </mat-form-field>
+
+    <!--name field end-->
+
+    <!-- Email -->
+    <mat-form-field>
+      <mat-label>Email</mat-label>
+      <input type="email" matInput formControlName="email">
+      @if (registerForm.get('email')?.invalid && hasDisplableError('email')) {
+        <mat-error>Email is required</mat-error>
+      } @else if (registerForm.get('email')?.dirty && registerForm.get('email')?.hasError('email')) {
+        <mat-error>
+          Email is not valid
+        </mat-error>
+      }
+    </mat-form-field>
+
+    <!--    email field end-->
+
+    <!-- password -->
+    <mat-form-field>
+      <mat-label>password</mat-label>
+      <input matInput [type]="hide() ? 'password' : 'text'" formControlName="password" >
+      <button
+        mat-icon-button
+        matSuffix
+        type="button"
+        (click)="clickEvent($event)"
+        [attr.aria-label]=" 'Hide Password'"
+        [attr.aria-pressed]="hide()">
+        <mat-icon>{{hide() ? 'visibility_off' : 'visibility'}}</mat-icon>
+      </button>
+
+      @if (registerForm.get('password')?.hasError('minlength')) {
+        <mat-error>
+          Must be at least 8 characters long
+        </mat-error>
+      } @else if (hasDisplableError('password')) {
+        <mat-error>Password is required</mat-error>
+      }
+    </mat-form-field>
+
+    <!--    password field end-->
+
+
+    <!-- password Confirmation -->
+    <!--    <mat-form-field>-->
+    <!--      <mat-label>Password Confirmation</mat-label>-->
+    <!--      <input type="password" matInput formControlName="password_confirmation">-->
+
+    <!--      @if (registerForm.get("password_confirmation")?.dirty && registerForm.get('password_confirmation')?.hasError('notSame')) {-->
+    <!--        <mat-error>Password didn't match</mat-error>-->
+    <!--      }-->
+
+    <!--      @else if (hasDisplableError('password_confirmation') && registerForm.get("password_confirmation")) {-->
+    <!--        <mat-error> This field is required  </mat-error>-->
+    <!--      }-->
+
+    <!--    </mat-form-field>-->
+
+    <!--   password confirmation end -->
+
+
+
+    <!-- register button -->
+    <button type="submit" [disabled]="registerForm.invalid && registerForm.hasError" mat-stroked-button>Register</button>
+  </form>
+</div>
+
+

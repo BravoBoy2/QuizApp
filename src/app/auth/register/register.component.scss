@@ -1,0 +1,25 @@
+.form{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+form{
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+}
+
+.register-title{
+  display: flex;
+  text-align: center;
+  justify-content: center;
+  align-items: center;
+}
+
+
+.register-title mat-icon {
+  align-self: center;
+  font-size: 1.5em;
+}
