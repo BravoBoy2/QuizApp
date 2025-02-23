@@ -3,12 +3,14 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  height: 80%;
 }
 
 form{
   display: flex;
   flex-direction: column;
   justify-content: space-evenly;
+  height: 50vh;
 }
 
 .register-title{
@@ -22,4 +24,21 @@ form{
 .register-title mat-icon {
   align-self: center;
   font-size: 1.5em;
+}
+
+.button-section{
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+}
+
+a{
+  text-decoration: none;
+  margin-left: 0.2em;
+  }
+
+span{
+  align-items: center;
+  padding-bottom: 0.5em;
+  margin-bottom: 0.5em;
 }

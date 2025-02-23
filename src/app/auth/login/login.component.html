@@ -1,1 +1,37 @@
-<p>login works!</p>
+<span class="login-title">
+<h2 matPrefix>Login</h2>
+</span>
+
+<form [formGroup]="loginForm" (ngSubmit)="onSubmit()"  >
+
+  <!--  Email-->
+  <mat-form-field>
+    <mat-label>email</mat-label>
+    <input matInput type="email" formControlName="email">
+    <mat-icon matSuffix>account_box</mat-icon>
+    <mat-error>Email is required</mat-error>
+  </mat-form-field>
+
+
+
+<!--password-->
+  <mat-form-field>
+    <mat-label>Password</mat-label>
+    <input matInput [type]="hide() ? 'password' : 'text'" formControlName="password">
+    <button
+      mat-icon-button
+      type="button"
+      matSuffix (click)="clickEvent($event)"
+      [attr.aria-label]=" 'Hide Password'"
+      [attr.aria-pressed]="hide()"> <mat-icon>{{hide() ? 'visibility_off' : 'visibility'}}</mat-icon>
+    </button>
+    <mat-error>Password is required</mat-error>
+  </mat-form-field>
+
+  <!--  Button-->
+  <div class="button-section">
+    <button mat-button color="primary" matPrefix routerLink="/register">Create account</button>
+    <button mat-flat-button  type="submit" [disabled]="loginForm.invalid && loginForm.hasError" >Login</button>
+  </div>
+</form>
+

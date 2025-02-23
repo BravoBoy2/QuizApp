@@ -76,11 +76,19 @@
 
     <!--   password confirmation end -->
 
+    <!--    login button that redirects the user to login page-->
+    <span> <small>Registered already? </small> <a matPrefix routerLink="/login">Log in</a></span>
 
 
+    <div class="button-section">
     <!-- register button -->
     <button type="submit" [disabled]="registerForm.invalid && registerForm.hasError" mat-stroked-button>Register</button>
+    </div>
   </form>
 </div>
+
+
+
+
 
 

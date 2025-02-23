@@ -12,7 +12,7 @@ import {MatIconButton} from '@angular/material/button';
     CommonModule,
     MatIcon,
     MatInputModule,
-    MatIconButton,
+    MatIconButton
 
   ],
   exports: [MatIcon,
