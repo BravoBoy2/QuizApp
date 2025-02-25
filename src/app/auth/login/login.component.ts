@@ -54,6 +54,11 @@ constructor(private authService : AuthService, private router : Router) { }
       setTimeout(()=>{
         this.loginForm.reset();
         this.dialog.closeAll();
+        if (this.userStorage.isUser()){
+          this.router.navigate(['user/dashboard']);
+        } else if (this.userStorage.isAdmin()){
+          this.router.navigate(['admin/dashboard']);
+        }
         },2000);
       console.log(response);
     },

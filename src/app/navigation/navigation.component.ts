@@ -10,6 +10,8 @@ import { Observable } from 'rxjs';
 import { map, shareReplay } from 'rxjs/operators';
 import {Router, RouterLink, RouterLinkActive, RouterOutlet} from '@angular/router';
 import {UserStorageService} from '../Services/user-storage.service';
+import {MatDialog} from '@angular/material/dialog';
+import {DialogComponent} from '../dialog/dialog.component';
 
 @Component({
   selector: 'app-navigation',
@@ -33,6 +35,7 @@ export class NavigationComponent {
   isUserLoggedIn: boolean = false;
   isAdminLoggedIn: boolean = false;
   userStorage = inject(UserStorageService);
+  dialog = inject(MatDialog);
 
   constructor(private router: Router) {}
 
@@ -44,8 +47,18 @@ export class NavigationComponent {
   }
 
   logout() {
-    this.userStorage.logOut();
-    this.router.navigate(['/login']);
+    this.dialog.open(DialogComponent, {
+      data: {
+        title: 'Goodbye',
+        message: 'You have been logged out',
+      }
+    });
+    setTimeout(()=>{
+      this.dialog.closeAll();
+      this.userStorage.logOut();
+      this.router.navigate(['/login']);
+    },2000);
+
   }
 
   isHandset$: Observable<boolean> = this.breakpointObserver.observe(Breakpoints.Handset)

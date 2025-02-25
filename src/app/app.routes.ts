@@ -9,5 +9,12 @@ export const routes: Routes = [
   {path: '', component: HomeComponent, title: 'Home'},
   {path: 'register', component: RegisterComponent, title:'register'},
   {path: 'login', component: LoginComponent, title: 'login'},
+  {path: 'user',
+    loadChildren: () => import("./Modules/user/user.module")
+      .then(m => m.UserModule)
+  },
+  {path: 'admin', loadChildren: () => import("./Modules/admin/admin.module")
+      .then(m => m.AdminModule)
+  },
   {path: '**', component: NotFoundComponent }
 ];
