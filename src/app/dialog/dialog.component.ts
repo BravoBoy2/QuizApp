@@ -17,7 +17,8 @@ import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
     MatDialogActions,
     MatButton,
     MatDialogClose,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatDialogTitle
   ],
   templateUrl: './dialog.component.html',
   styleUrl: './dialog.component.scss'

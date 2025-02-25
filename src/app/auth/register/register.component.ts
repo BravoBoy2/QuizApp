@@ -49,7 +49,7 @@ export class RegisterComponent {
                 this.dialog.closeAll()
                 this.registerForm.reset();
               });
-            },1000);
+            },2000);
 
 
           },

@@ -15,4 +15,9 @@ export class AuthService {
     const url = `/api/${apiRoute}`;
     return this.http.post<Observable<any>>(url, formData);
   }
+
+  login(apiRoute: string, data : any): Observable<any> {
+    const url = `/api/${apiRoute}`
+    return this.http.post(url, data);
+  }
 }

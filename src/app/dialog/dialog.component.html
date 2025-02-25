@@ -3,8 +3,10 @@
   <p>{{data.message}}</p>
 
   @if (data.loading){
+    <div class="spinner-div">
     <mat-spinner class="spinner" mode="indeterminate">Loading...</mat-spinner>
-  }
+    </div>
+      }
 </mat-dialog-content>
 
 

@@ -1,10 +1,11 @@
-import {Component, signal} from '@angular/core';
+import {Component, inject, signal} from '@angular/core';
 import {AuthModule} from '../auth.module';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {AuthService} from '../auth.service';
 import {MatButton} from '@angular/material/button';
-import {RouterLink} from '@angular/router';
-import {HttpResponse} from '@angular/common/http';
+import {Router, RouterLink} from '@angular/router';
+import {MatDialog} from '@angular/material/dialog';
+import {DialogComponent} from '../../dialog/dialog.component';
 
 @Component({
   selector: 'app-login',
@@ -14,6 +15,7 @@ import {HttpResponse} from '@angular/common/http';
 })
 export class LoginComponent {
 hide = signal(true);
+dialog = inject(MatDialog);
 
 
 loginForm = new FormGroup({
@@ -22,17 +24,38 @@ loginForm = new FormGroup({
 
 });
 
-constructor(private authService : AuthService) {}
+constructor(private authService : AuthService, private router : Router) { }
 
 
   onSubmit() {
   if (this.loginForm.valid) {
-    this.authService.fetchData('login', this.loginForm.value).subscribe({
-      next: (response: HttpResponse<any>) =>
+    this.authService.login('login', this.loginForm.value).subscribe({
+      next: (response: any) =>
     {
+      this.dialog.open(DialogComponent, {
+        data: {
+          title: "Logged in successfully!",
+          message: `Welcome ${response.name}`,
+          loading: true
+        }
+      });
+
+      setTimeout(()=>{
+        this.router.navigate(['/'])
+          .then(() =>{
+        this.loginForm.reset();
+        this.dialog.closeAll();
+        }
+      )},2000);
       console.log(response);
     },
-    error: (error: HttpResponse<any>) => {
+    error: (error: any) => {
+        this.dialog.open(DialogComponent,
+           { data : {
+          title: 'Error',
+            message : error.error.message
+           },
+           });
         console.log(error);
     }
   })
