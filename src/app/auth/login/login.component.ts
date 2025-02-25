@@ -6,6 +6,7 @@ import {MatButton} from '@angular/material/button';
 import {Router, RouterLink} from '@angular/router';
 import {MatDialog} from '@angular/material/dialog';
 import {DialogComponent} from '../../dialog/dialog.component';
+import {UserStorageService} from '../../Services/user-storage.service';
 
 @Component({
   selector: 'app-login',
@@ -16,6 +17,7 @@ import {DialogComponent} from '../../dialog/dialog.component';
 export class LoginComponent {
 hide = signal(true);
 dialog = inject(MatDialog);
+userStorage = inject(UserStorageService);
 
 
 loginForm = new FormGroup({
@@ -32,6 +34,7 @@ constructor(private authService : AuthService, private router : Router) { }
     this.authService.login('login', this.loginForm.value).subscribe({
       next: (response: any) =>
     {
+
       this.dialog.open(DialogComponent, {
         data: {
           title: "Logged in successfully!",
@@ -40,13 +43,18 @@ constructor(private authService : AuthService, private router : Router) { }
         }
       });
 
+      const user = {
+        id: response.id,
+        name: response.name,
+        email: response.email,
+        role : response.role,
+      };
+      this.userStorage.saveUser(user);
+
       setTimeout(()=>{
-        this.router.navigate(['/'])
-          .then(() =>{
         this.loginForm.reset();
         this.dialog.closeAll();
-        }
-      )},2000);
+        },2000);
       console.log(response);
     },
     error: (error: any) => {
