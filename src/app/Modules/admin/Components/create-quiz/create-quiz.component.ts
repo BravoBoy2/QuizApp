@@ -1,4 +1,4 @@
-import {Component} from '@angular/core';
+import {Component, inject} from '@angular/core';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatInputModule} from '@angular/material/input';
@@ -6,7 +6,9 @@ import {MatButtonModule} from '@angular/material/button';
 import {MatDialogTitle} from '@angular/material/dialog';
 import {MatTimepickerModule} from '@angular/material/timepicker';
 import {provideNativeDateAdapter} from '@angular/material/core';
-import {range} from 'rxjs';
+import {AdminService} from '../../Services/admin.service';
+import {Router} from '@angular/router';
+import {MatSnackBar} from '@angular/material/snack-bar';
 
 
 
@@ -26,17 +28,60 @@ import {range} from 'rxjs';
 })
 export class CreateQuizComponent {
 
+  private snackBar = inject(MatSnackBar);
+
   createQuiz = new FormGroup({
     title: new FormControl('', [Validators.required, Validators.maxLength(10)]),
     description: new FormControl('', [Validators.required, Validators.minLength(10)]),
     time: new FormControl('', [Validators.required]),
   });
 
-  constructor() {
+  constructor(private adminService: AdminService, private router: Router) {
+  }
+  openSnackbar(message: string, action: string = 'Close', duration: number = 3000) {
+    this.snackBar.open(message, action, {
+      duration: duration,
+      horizontalPosition: 'center',
+      verticalPosition: 'bottom',
+    });
   }
 
   submitQuiz() {
-    return null;
+    if (this.createQuiz.valid) {
+      this.adminService.createQuizTest('quiz', this.createQuiz.value)
+        .subscribe({
+          next: (response : any)=> {
+            const timeValue = this.createQuiz.get("time")?.value;
+            if (timeValue) {
+              const formattedTime = this.formatTime(timeValue);
+            }
+            this.openSnackbar(`Quiz has been created ${response.title}`, "close", 3000);
+            setTimeout(()=>{
+              this.createQuiz.reset();
+              this.router.navigate(['admin/dashboard']);
+
+            }, 2500);
+          },
+      error: (error)=> {
+            console.error(error);
+            this.openSnackbar( error.message, "try again", 5000);
+      }
+  });
+    }
+  }
+
+  formatTime(time: string | null): string {
+    if (!time) {
+      return "00:10:00"; // Default to 00:00:00 if time is null or empty
+    }
+
+    if (!time.includes(":")){
+      return time + ":00:00";
+    } else if (time.split(":").length === 2){
+      return time + ":00";
+    } else {
+      return time;
+    }
   }
 
   displayError(controlName:string): boolean {
@@ -44,5 +89,6 @@ export class CreateQuizComponent {
     return Boolean(control?.invalid) && Boolean(control?.touched);
   }
 
-  protected readonly range = range;
+
+
 }

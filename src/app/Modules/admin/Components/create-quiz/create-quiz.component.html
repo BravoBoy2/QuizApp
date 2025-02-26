@@ -19,7 +19,7 @@
 <!--    Description Field-->
     <mat-form-field appearance="fill">
       <mat-label>Description</mat-label>
-      <textarea matInput  formControlName="description" required></textarea>
+      <textarea matInput formControlName="description" required></textarea>
       @if (displayError("description")){
       <mat-error >
         Description is required
@@ -53,7 +53,7 @@
 
     <mat-form-field appearance="fill">
       <mat-label>Select Time</mat-label>
-      <input matInput type="time" formControlName="timeOfDay" required>
+      <input matInput type="time" formControlName="time" required>
       <mat-hint>Duration: 1 minute to 3 hours
       <br>
         Format: HH:mm
