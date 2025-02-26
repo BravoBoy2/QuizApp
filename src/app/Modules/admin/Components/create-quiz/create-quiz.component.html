@@ -1,0 +1,78 @@
+<div class="quizForm">
+
+  <h1 matDialogTitle> Create Quiz</h1>
+  <form [formGroup]="createQuiz" (ngSubmit)="submitQuiz()">
+
+
+<!--    title field-->
+    <mat-form-field appearance="fill">
+      <mat-label>Title</mat-label>
+      <input matInput formControlName="title" required>
+      @if (displayError("title")){
+      <mat-error>
+        Title is required
+      </mat-error>
+      }
+    </mat-form-field>
+
+
+<!--    Description Field-->
+    <mat-form-field appearance="fill">
+      <mat-label>Description</mat-label>
+      <textarea matInput  formControlName="description" required></textarea>
+      @if (displayError("description")){
+      <mat-error >
+        Description is required
+      </mat-error>
+      }
+    </mat-form-field>
+
+
+    <!--    Time field-->
+<!--    <mat-form-field>-->
+<!--      <mat-label>Pick a time</mat-label>-->
+<!--      <input-->
+<!--        matInput-->
+<!--        >-->
+<!--      <mat-timepicker-toggle matIconSuffix [for]="picker"/>-->
+<!--      <mat-timepicker #picker/>-->
+<!--      <mat-hint>Enter a value before 12:30 PM or after 5:30 PM to see the errors</mat-hint>-->
+
+<!--      @if (createQuiz.errors?.['matTimepickerRange']) {-->
+<!--        <mat-error>Value isn't a valid time</mat-error>-->
+<!--      }-->
+
+<!--      @if (createQuiz.errors?.['matTimepickerMin']) {-->
+<!--        <mat-error>Value is too early</mat-error>-->
+<!--      }-->
+
+<!--      @if (createQuiz.errors?.['matTimepickerMax']) {-->
+<!--        <mat-error>Value is too late</mat-error>-->
+<!--      }-->
+<!--    </mat-form-field>-->
+
+    <mat-form-field appearance="fill">
+      <mat-label>Select Time</mat-label>
+      <input matInput type="time" formControlName="timeOfDay" required>
+      <mat-hint>Duration: 1 minute to 3 hours
+      <br>
+        Format: HH:mm
+      </mat-hint>
+      @if (displayError("time")) {
+        <mat-error>Time is required</mat-error>
+      }
+    </mat-form-field>
+
+<!--    @if (createQuiz.errors != null) {-->
+
+<!--      <mat-error>-->
+<!--        <p>Errors: {{createQuiz.errors | json}}</p>-->
+<!--      </mat-error>-->
+<!--    }-->
+    <div class="button-area">
+
+    <button mat-raised-button type="submit" [disabled]="createQuiz.invalid && createQuiz.hasError">Create Quiz Test</button>
+    </div>
+  </form>
+
+</div>
