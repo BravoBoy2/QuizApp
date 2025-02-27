@@ -31,7 +31,7 @@ export class CreateQuizComponent {
   private snackBar = inject(MatSnackBar);
 
   createQuiz = new FormGroup({
-    title: new FormControl('', [Validators.required, Validators.maxLength(10)]),
+    title: new FormControl('', [Validators.required, Validators.minLength(6)]),
     description: new FormControl('', [Validators.required, Validators.minLength(10)]),
     time: new FormControl('', [Validators.required]),
   });
@@ -48,19 +48,20 @@ export class CreateQuizComponent {
 
   submitQuiz() {
     if (this.createQuiz.valid) {
-      this.adminService.createQuizTest('quiz', this.createQuiz.value)
+      let formData = this.createQuiz.value;
+
+      //date format
+      formData.time = formData.time + ":00";
+      this.adminService.createQuizTest('quiz', formData)
         .subscribe({
           next: (response : any)=> {
-            const timeValue = this.createQuiz.get("time")?.value;
-            if (timeValue) {
-              const formattedTime = this.formatTime(timeValue);
-            }
-            this.openSnackbar(`Quiz has been created ${response.title}`, "close", 3000);
+
+            this.openSnackbar(`Quiz: "${response.title}" has been created`, "close", 3000);
             setTimeout(()=>{
               this.createQuiz.reset();
               this.router.navigate(['admin/dashboard']);
 
-            }, 2500);
+            }, 2000);
           },
       error: (error)=> {
             console.error(error);
