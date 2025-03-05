@@ -7,7 +7,7 @@
 <!--    title field-->
     <mat-form-field appearance="fill">
       <mat-label>Title</mat-label>
-      <input matInput type="" formControlName="title" required>
+      <input matInput type="text" formControlName="title" required>
       @if (displayError("title")){
       <mat-error>
         Title is required
@@ -52,7 +52,7 @@
 <!--    </mat-form-field>-->
 
     <mat-form-field appearance="fill">
-      <mat-label>Select Time</mat-label>
+      <mat-label>Total Duration</mat-label>
       <input matInput type="time" formControlName="time" required>
       <mat-hint>Duration: 1 minute to 3 hours
       <br>
@@ -60,6 +60,11 @@
       </mat-hint>
       @if (displayError("time")) {
         <mat-error>Time is required</mat-error>
+      }
+      @if ( displayError("time")
+      && createQuiz.get('time')?.hasError('invalidTime'))
+      {
+        <mat-error>Time must be between 1 minute and 3 </mat-error>
       }
     </mat-form-field>
 

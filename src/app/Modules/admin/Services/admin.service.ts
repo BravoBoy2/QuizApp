@@ -14,4 +14,9 @@ export class AdminService {
     const url = `/api/${apiRoute}`;
     return this.http.post(url, formData);
   }
+
+  getAllQuizzes() : Observable<any>{
+    const url = "/api/quiz";
+    return this.http.get(url);
+  }
 }

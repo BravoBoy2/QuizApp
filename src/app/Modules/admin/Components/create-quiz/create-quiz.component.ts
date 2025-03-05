@@ -31,9 +31,13 @@ export class CreateQuizComponent {
   private snackBar = inject(MatSnackBar);
 
   createQuiz = new FormGroup({
-    title: new FormControl('', [Validators.required, Validators.minLength(6)]),
-    description: new FormControl('', [Validators.required, Validators.minLength(10)]),
-    time: new FormControl('', [Validators.required]),
+    title: new FormControl('',
+      [Validators.required,
+        Validators.minLength(6), Validators.maxLength(40)]),
+    description:
+      new FormControl('', [Validators.required,
+        Validators.minLength(10), Validators.maxLength(255)]),
+    time: new FormControl('', [Validators.required, this.timeValidator]),
   });
 
   constructor(private adminService: AdminService, private router: Router) {
@@ -71,18 +75,22 @@ export class CreateQuizComponent {
     }
   }
 
-  formatTime(time: string | null): string {
+  timeValidator(control: FormControl): { [key: string]: boolean } | null {
+    const time = control.value;
     if (!time) {
-      return "00:10:00"; // Default to 00:00:00 if time is null or empty
+      return {"invalidTime": true};
     }
 
-    if (!time.includes(":")){
-      return time + ":00:00";
-    } else if (time.split(":").length === 2){
-      return time + ":00";
-    } else {
-      return time;
+    const [hours, minutes] = time.split(":").map(Number);
+    if(isNaN(hours) || isNaN(minutes)){
+      return {"invalidTime": true};
     }
+
+    const totalMinutes = hours * 60 + minutes;
+    if (totalMinutes < 1 || totalMinutes > 180) {
+      return {"invalidTime": true};
+    }
+    return null;
   }
 
   displayError(controlName:string): boolean {

@@ -1,12 +1,12 @@
 <div class="grid-container">
   <h1 class="mat-h1">Dashboard</h1>
   <mat-grid-list cols="2" rowHeight="350px">
-    @for (card of cards | async; track card) {
-      <mat-grid-tile [colspan]="card.cols" [rowspan]="card.rows">
-        <mat-card class="dashboard-card">
+    @for (quiz of quizzes | async; track quiz) {
+      <mat-grid-tile [colspan]="quiz.cols" [rowspan]="quiz.rows">
+        <mat-card class="dashboard-card" appearance="raised">
           <mat-card-header>
             <mat-card-title>
-              {{card.title}}
+              {{quiz.title}}
               <button mat-icon-button class="more-button" [matMenuTriggerFor]="menu" aria-label="Toggle menu">
                 <mat-icon>more_vert</mat-icon>
               </button>
@@ -15,9 +15,10 @@
                 <button mat-menu-item>Remove</button>
               </mat-menu>
             </mat-card-title>
+            <mat-card-subtitle>{{quiz.time}}</mat-card-subtitle>
           </mat-card-header>
           <mat-card-content class="dashboard-card-content">
-            <div>Card Content Here</div>
+                {{quiz.description}}
           </mat-card-content>
         </mat-card>
       </mat-grid-tile>
