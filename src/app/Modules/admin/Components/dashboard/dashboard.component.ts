@@ -7,6 +7,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import {AdminService} from '../../Services/admin.service';
 import {Observable, of} from 'rxjs';
+import {RouterLink} from '@angular/router';
 
 export interface Quiz {
   id: number;
@@ -30,6 +31,7 @@ export interface Quiz {
     MatIconModule,
     MatButtonModule,
     MatCardModule,
+    RouterLink,
   ]
 })
 export class DashboardComponent {

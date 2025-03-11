@@ -13,6 +13,7 @@
               <mat-menu #menu="matMenu" xPosition="before">
                 <button mat-menu-item>Expand</button>
                 <button mat-menu-item>Remove</button>
+                <button mat-menu-item routerLink="/admin/add-questions/{{quiz.id}}">Add Question </button>
               </mat-menu>
             </mat-card-title>
             <mat-card-subtitle>{{quiz.time}}</mat-card-subtitle>
