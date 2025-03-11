@@ -10,7 +10,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { CommonModule } from '@angular/common';
-import { Option, QuestionType } from '../../Services/quiz';
+import { QuestionType } from '../../Services/quiz';
 
 @Component({
   selector: 'app-add-questions',
@@ -124,57 +124,93 @@ export class AddQuestionsComponent implements OnInit {
     }
   }
 
-  // Submit question
+  // Submit question - Refactored for better readability and maintenance
   onSubmit() {
-    if (this.addQuestion.valid && this.quizId) {
-      let questionData: any = {
-        questionText: this.addQuestion.get('questionText')?.value,
-        type: this.addQuestion.get('type')?.value,
-        quiz: { id: this.quizId }
-      };
-
-      if (this.addQuestion.get('type')?.value === QuestionType.TEXT) {
-        questionData.correctAnswer = this.addQuestion.get('correctAnswer')?.value;
-        questionData.options = [];
-      } else {
-        questionData.options = (this.addQuestion.get('options') as FormArray).controls.map(
-          control => ({
-            answerText: control.get('answerText')?.value,
-            isCorrect: control.get('isCorrect')?.value
-          })
-        );
-        questionData.correctAnswer = '';
-      }
-
-      console.log('Submitting question data:', questionData);
-
-      // Updated to use the correct method with both parameters
-      this.adminService.addQuestionToQuiz(this.quizId, [questionData]).subscribe({
-        next: (response : any) => {
-          console.log('Success response:', response);
-          this.snackBar.open('Question added successfully!', 'Close', {
-            duration: 3000,
-            verticalPosition: 'bottom'
-          });
-          this.addQuestion.reset();
-          this.addQuestion.get('type')?.setValue(QuestionType.MCQ);
-          // Reset form for next question or navigate based on your requirement
-        },
-        error: (error: any) => {
-          console.error('Full error details:', error);
-          let errorMessage = 'Failed to add question. Please try again.';
-          if (error.error && typeof error.error === 'string') {
-            errorMessage += ' Server says: ' + error.error;
-          }
-          this.snackBar.open(errorMessage, 'Close', {
-            duration: 5000,
-            verticalPosition: 'bottom'
-          });
-        }
-      });
-    } else {
+    if (!this.isFormValid()) {
       this.markFormGroupTouched(this.addQuestion);
+      return;
     }
+
+    const questionData = this.prepareQuestionData();
+    console.log('Submitting question data:', questionData);
+
+    this.submitQuestionToServer(questionData);
+  }
+
+  private isFormValid(): boolean {
+    return this.addQuestion.valid && this.quizId !== null;
+  }
+
+  private prepareQuestionData(): any {
+    const questionData: any = {
+      questionText: this.addQuestion.get('questionText')?.value,
+      type: this.addQuestion.get('type')?.value,
+      quiz: { id: this.quizId }
+    };
+
+    const questionType = this.addQuestion.get('type')?.value;
+
+    if (questionType === QuestionType.TEXT) {
+      questionData.correctAnswer = this.addQuestion.get('correctAnswer')?.value;
+      questionData.options = [];
+    } else {
+      questionData.options = this.getOptionsFromForm();
+      questionData.correctAnswer = '';
+    }
+
+    return questionData;
+  }
+
+  private getOptionsFromForm(): any[] {
+    return (this.addQuestion.get('options') as FormArray).controls.map(
+      control => ({
+        answerText: control.get('answerText')?.value,
+        isCorrect: control.get('isCorrect')?.value
+      })
+    );
+  }
+
+  private submitQuestionToServer(questionData: any): void {
+    this.adminService.addQuestionToQuiz(this.quizId as number, [questionData]).subscribe({
+      next: this.handleSubmitSuccess.bind(this),
+      error: this.handleSubmitError.bind(this)
+    });
+  }
+
+  private handleSubmitSuccess(response: any): void {
+    console.log('Success response:', response);
+    this.snackBar.open('Question added successfully!', 'Close', {
+      duration: 3000,
+      verticalPosition: 'bottom'
+    });
+
+    this.resetForm();
+  }
+
+  private resetForm(): void {
+    this.addQuestion.reset();
+    this.addQuestion.get('type')?.setValue(QuestionType.MCQ);
+
+    // Clear and re-add initial options
+    const optionsArray = this.addQuestion.get('options') as FormArray;
+    while (optionsArray.length) {
+      optionsArray.removeAt(0);
+    }
+    this.addOption();
+    this.addOption();
+  }
+
+  private handleSubmitError(error: any): void {
+    console.error('Full error details:', error);
+    let errorMessage = 'Failed to add question. Please try again.';
+    if (error.error && typeof error.error === 'string') {
+      errorMessage += ' Server says: ' + error.error;
+    }
+
+    this.snackBar.open(errorMessage, 'Close', {
+      duration: 5000,
+      verticalPosition: 'bottom'
+    });
   }
 
   // Helper method to mark all controls as touched
