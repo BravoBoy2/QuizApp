@@ -10,7 +10,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { CommonModule } from '@angular/common';
-import { QuestionType } from '../../Services/quiz';
+import { Option, QuestionType } from '../../Services/quiz';
 
 @Component({
   selector: 'app-add-questions',
