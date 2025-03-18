@@ -1,20 +1,20 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import { AbstractControl, FormArray, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
-import { AdminService } from '../../Services/admin.service';
+import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
+import {FormArray, FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
+import {ActivatedRoute, Router} from '@angular/router';
+import {AdminService} from '../../Services/admin.service';
 
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
-import { MatCheckboxModule, MatCheckboxChange } from '@angular/material/checkbox';
-import { MatIconModule } from '@angular/material/icon';
-import { MatButtonModule } from '@angular/material/button';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { CommonModule } from '@angular/common';
-import { QuestionType } from '../../Services/quiz';
-import { MatExpansionModule } from '@angular/material/expansion';
-import { MatCardModule } from '@angular/material/card';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatRadioModule } from '@angular/material/radio';
+import {MatInputModule} from '@angular/material/input';
+import {MatSelectModule} from '@angular/material/select';
+import {MatCheckboxModule} from '@angular/material/checkbox';
+import {MatIconModule} from '@angular/material/icon';
+import {MatButtonModule} from '@angular/material/button';
+import {MatSnackBar} from '@angular/material/snack-bar';
+import {CommonModule} from '@angular/common';
+import {QuestionType} from '../../Services/quiz';
+import {MatExpansionModule} from '@angular/material/expansion';
+import {MatCardModule} from '@angular/material/card';
+import {MatFormFieldModule} from '@angular/material/form-field';
+import {MatRadioModule} from '@angular/material/radio';
 
 @Component({
   selector: 'app-add-questions',
@@ -290,11 +290,8 @@ export class AddQuestionsComponent implements OnInit {
 
         // TEXT type validation
         if (type === 'TEXT') {
-          const correctAnswer = form.get('correctAnswer')?.value;
-          if (!correctAnswer) {
-            return false;
-          }
-          return true;
+          return form.get('correctAnswer')?.value;
+
         }
 
         // MCQ and SINGLE type validation
@@ -333,11 +330,9 @@ export class AddQuestionsComponent implements OnInit {
           return false;
         }
 
-        if (type === 'SINGLE' && correctCount !== 1) {
-          return false;
-        }
+        return !(type === 'SINGLE' && correctCount !== 1);
 
-        return true;
+
       });
     } catch (error) {
       console.error('Error in validation:', error);
@@ -438,7 +433,7 @@ export class AddQuestionsComponent implements OnInit {
 
     // Removed redundant logging of raw options array
 
-    const mappedOptions = optionsArray.controls.map((control, index) => {
+    return optionsArray.controls.map((control, index) => {
       const formGroup = control as FormGroup;
       const answerText = formGroup.get('answerText')?.value;
       const isCorrect = formGroup.get('isCorrect')?.value;
@@ -453,14 +448,12 @@ export class AddQuestionsComponent implements OnInit {
         isCorrect: isCorrect === true // Ensure boolean value
       };
     });
-
-    return mappedOptions;
   }
 
   private submitQuestionsToServer(questionDataList: any[]): void {
     this.adminService.addQuestionToQuiz(this.quizId as number, questionDataList).subscribe({
       next: (response) => {
-        this.snackBar.open(`${questionDataList.length} question(s) added successfully!`, 'Close', {
+        this.snackBar.open(`${questionDataList.length} question(s) added successfully to ${response.title}`, 'Close', {
           duration: 3000,
           verticalPosition: 'bottom'
         });
