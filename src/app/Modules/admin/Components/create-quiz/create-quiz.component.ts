@@ -9,6 +9,7 @@ import {provideNativeDateAdapter} from '@angular/material/core';
 import {AdminService} from '../../Services/admin.service';
 import {Router} from '@angular/router';
 import {MatSnackBar} from '@angular/material/snack-bar';
+import { CommonModule } from '@angular/common';
 
 
 
@@ -20,7 +21,8 @@ import {MatSnackBar} from '@angular/material/snack-bar';
     MatInputModule,
     MatDialogTitle,
     MatTimepickerModule,
-    MatButtonModule
+    MatButtonModule,
+    CommonModule
   ],
   providers: [provideNativeDateAdapter()],
   templateUrl: './create-quiz.component.html',
