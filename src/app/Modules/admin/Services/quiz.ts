@@ -2,7 +2,7 @@ export interface Quiz {
   id: number;
   title: string;
   description: string;
-  time: string;
+  time: string; // Changed from string to number to match Java backend's Time type
   questions: Question[];
 }
 
@@ -18,7 +18,7 @@ export interface Question {
   type: QuestionType;
   options: Option[];
   correctAnswer?: string;
-  quiz?: any;
+  quiz?: Quiz;
 }
 
 export interface Option {

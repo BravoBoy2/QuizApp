@@ -1,0 +1,221 @@
+<div class="view-quiz-container">
+  <!-- Loading indicator -->
+  <div *ngIf="loading" class="loading-container">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>Loading quiz content...</p>
+  </div>
+
+  <!-- Error display -->
+  <div *ngIf="!loading && error" class="error-container">
+    <mat-card>
+      <mat-card-content>
+        <p class="error-message">{{ error }}</p>
+        <button mat-raised-button color="primary" (click)="goBackToDashboard()">
+          <mat-icon>arrow_back</mat-icon> Back to Dashboard
+        </button>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Quiz content when loaded successfully -->
+  <div *ngIf="!loading && !error && quiz" class="quiz-content">
+    <!-- Action bar -->
+    <div class="actions-bar">
+      <button mat-stroked-button color="primary" (click)="goBackToDashboard()">
+        <mat-icon>arrow_back</mat-icon> Back
+      </button>
+      <div class="action-buttons">
+        <button mat-raised-button color="primary" (click)="addMoreQuestions()">
+          <mat-icon>add</mat-icon> Add Questions
+        </button>
+        <button mat-stroked-button color="accent" (click)="editQuiz()">
+          <mat-icon>edit</mat-icon> Edit Quiz
+        </button>
+        <button mat-stroked-button color="warn" (click)="deleteQuiz()">
+          <mat-icon>delete</mat-icon> Delete Quiz
+        </button>
+      </div>
+    </div>
+
+    <!-- Quiz details -->
+    <mat-card class="quiz-details-card">
+      <!-- Quiz header -->
+      <mat-card-header>
+        <div mat-card-avatar class="quiz-header-image">
+          <mat-icon color="primary">quiz</mat-icon>
+        </div>
+        <mat-card-title>{{ quiz.title || "Untitled Quiz" }}</mat-card-title>
+        <mat-card-subtitle>
+          {{ quiz.description || "No description provided" }}
+        </mat-card-subtitle>
+      </mat-card-header>
+
+      <!-- Quiz metadata -->
+      <mat-card-content>
+        <div class="quiz-metadata">
+          <div class="metadata-item">
+            <strong>Questions:</strong> {{ questions.length }}
+          </div>
+          <div class="metadata-item">
+            <strong>Time Limit:</strong>
+            <!-- Use the formatting method for time display with the correct path -->
+            <span>{{ getFormattedTime(quiz.time) }}</span>
+          </div>
+        </div>
+      </mat-card-content>
+
+      <mat-divider></mat-divider>
+
+      <!-- Questions filter -->
+      <div class="question-filters">
+        <mat-form-field appearance="outline">
+          <mat-label>Search Questions</mat-label>
+          <input
+            matInput
+            [(ngModel)]="searchText"
+            placeholder="Enter keywords"
+          />
+          <mat-icon matSuffix>search</mat-icon>
+          <button
+            *ngIf="searchText"
+            matSuffix
+            mat-icon-button
+            aria-label="Clear"
+            (click)="searchText = ''"
+          >
+            <mat-icon>close</mat-icon>
+          </button>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Filter by Type</mat-label>
+          <mat-select [(ngModel)]="selectedType">
+            <mat-option *ngFor="let type of questionTypes" [value]="type.value">
+              {{ type.display }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+
+      <!-- Questions list -->
+      <div class="questions-list">
+        <h3>
+          Questions ({{ filteredQuestions.length }} of {{ questions.length }})
+        </h3>
+
+        <!-- No questions message -->
+        <div *ngIf="filteredQuestions.length === 0" class="no-questions">
+          <p *ngIf="questions.length === 0">
+            <mat-icon color="warn">info</mat-icon>
+            No questions have been added to this quiz yet.
+          </p>
+          <p *ngIf="questions.length > 0">
+            <mat-icon>filter_alt</mat-icon>
+            No questions match your current filters.
+          </p>
+
+          <button
+            *ngIf="questions.length === 0"
+            mat-raised-button
+            color="primary"
+            (click)="addMoreQuestions()"
+          >
+            <mat-icon>add</mat-icon> Add Questions
+          </button>
+        </div>
+
+        <!-- Questions expansion panels -->
+        <mat-accordion *ngIf="filteredQuestions.length > 0" multi>
+          <mat-expansion-panel
+            *ngFor="let question of filteredQuestions; let i = index"
+          >
+            <mat-expansion-panel-header>
+              <mat-panel-title> Question {{ i + 1 }} </mat-panel-title>
+              <mat-panel-description>
+                <div class="question-summary">
+                  {{ question.questionText | slice : 0 : 60
+                  }}{{ question.questionText.length > 60 ? "..." : "" }}
+                </div>
+                <mat-chip-set>
+                  <mat-chip [color]="getChipColor(question.type)" selected>
+                    {{ getQuestionTypeDisplay(question.type) }}
+                  </mat-chip>
+                </mat-chip-set>
+              </mat-panel-description>
+            </mat-expansion-panel-header>
+
+            <!-- Question details -->
+            <div class="question-content">
+              <p class="question-text">{{ question.questionText }}</p>
+
+              <!-- Display for TEXT type questions -->
+              <div *ngIf="question.type === 'TEXT'" class="text-answer">
+                <h4>Correct Answer:</h4>
+                <div class="answer-box">
+                  {{ question.correctAnswer || "No answer provided" }}
+                </div>
+              </div>
+
+              <!-- Display for MCQ and SINGLE type questions -->
+              <div *ngIf="question.type !== 'TEXT'" class="options-container">
+                <h4>Options:</h4>
+                <div class="options-list">
+                  <div
+                    *ngFor="let option of question.options; let j = index"
+                    class="option"
+                    [class.correct-option]="isOptionCorrect(option)"
+                  >
+                    <div class="option-letter">{{ getOptionLetter(j) }}</div>
+                    <div class="option-text">{{ option.answerText }}</div>
+                    <div
+                      *ngIf="isOptionCorrect(option)"
+                      class="correct-indicator"
+                    >
+                      <mat-icon color="accent">check_circle</mat-icon>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Summary for MCQ/SINGLE -->
+                <div class="options-summary">
+                  <div
+                    *ngIf="question.type === 'SINGLE'"
+                    class="correct-summary single"
+                  >
+                    <strong>Correct Answer:</strong>
+                    {{ getCorrectOptionText(question) }}
+                  </div>
+                  <div
+                    *ngIf="question.type === 'MCQ'"
+                    class="correct-summary mcq"
+                  >
+                    <strong>Correct Answers:</strong>
+                    {{ getCorrectOptionsText(question) }}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Action buttons for each question -->
+            <mat-action-row>
+              <button
+                mat-button
+                color="warn"
+                (click)="deleteQuestion(question.id)"
+              >
+                <mat-icon>delete</mat-icon> Delete
+              </button>
+              <button
+                mat-button
+                color="primary"
+                (click)="editQuestion(question.id)"
+              >
+                <mat-icon>edit</mat-icon> Edit
+              </button>
+            </mat-action-row>
+          </mat-expansion-panel>
+        </mat-accordion>
+      </div>
+    </mat-card>
+  </div>
+</div>

@@ -36,4 +36,7 @@ export class AdminService {
     const url = `${this.baseUrl}/quiz`;
     return this.http.get(url);
   }
+  getQuizQuestions(quizId: number) : Observable<any>{
+    return this.http.get(`${this.baseUrl}/quiz/${quizId}`);
+  }
 }
