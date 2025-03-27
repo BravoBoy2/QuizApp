@@ -121,11 +121,11 @@ export class DashboardComponent implements OnInit {
   }
 
   startQuiz(quizId: number): void {
-    this.router.navigate(['/user/take-quiz', quizId]);
+    this.router.navigate(['/user/in-quiz', quizId]);
   }
 
   viewQuizDetails(quizId: number): void {
-    this.router.navigate(['/user/quiz-details', quizId]);
+    this.router.navigate(['/user/quiz-results', quizId]);
   }
 }
 

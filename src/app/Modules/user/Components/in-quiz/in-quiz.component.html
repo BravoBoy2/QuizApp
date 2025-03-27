@@ -1,0 +1,203 @@
+<div class="view-quiz-container">
+  <!-- Loading indicator -->
+  @if (loading()) {
+  <div class="loading-container">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>Loading quiz content...</p>
+  </div>
+  }
+
+  <!-- Error display -->
+  @if (!loading() && error()) {
+  <mat-card>
+    <mat-card-content>
+      <p class="error-message">{{ error() }}</p>
+      <button mat-raised-button color="primary" (click)="goBackToDashboard()">
+        <mat-icon>arrow_back</mat-icon> Back to Dashboard
+      </button>
+    </mat-card-content>
+  </mat-card>
+  }
+
+  <!-- Quiz content when loaded successfully -->
+  @if (!loading() && quiz()) {
+  <div class="quiz-content">
+    <!-- Basic navigation -->
+    <div class="actions-bar">
+      <button mat-stroked-button color="primary" (click)="goBackToDashboard()">
+        <mat-icon>arrow_back</mat-icon> Back to Dashboard
+      </button>
+
+      <!-- Timer display -->
+      @if (remainingTime() !== null && remainingTime() !== undefined) {
+      <div class="timer">Time left: {{ formatTime(remainingTime()!) }}</div>
+      }
+    </div>
+
+    <!-- Progress Bar - Simplified implementation -->
+    <div class="progress-container">
+      <div class="progress-label">
+        <span
+          >Progress: <strong>{{ getProgressValue() }}%</strong></span
+        >
+        <span>
+          <strong>{{ getAnsweredCount() }}</strong> /
+          {{ questions().length }} questions answered
+        </span>
+      </div>
+      <mat-progress-bar
+        [value]="getProgressValue()"
+        [color]="getProgressColor()"
+        mode="determinate"
+      >
+      </mat-progress-bar>
+    </div>
+
+    <!-- Quiz details -->
+    <mat-card class="quiz-details-card">
+      <!-- Quiz header -->
+      <mat-card-header>
+        <div mat-card-avatar class="quiz-header-image">
+          <mat-icon color="primary">quiz</mat-icon>
+        </div>
+        <mat-card-title>{{ quiz()?.title || "Untitled Quiz" }}</mat-card-title>
+        <mat-card-subtitle>
+          {{ quiz()?.description || "No description provided" }}
+        </mat-card-subtitle>
+      </mat-card-header>
+
+      <!-- Quiz metadata -->
+      <mat-card-content>
+        <div class="quiz-metadata">
+          <div class="metadata-item">
+            <strong>Questions:</strong> {{ questions().length }}
+          </div>
+          <div class="metadata-item">
+            <strong>Time Limit:</strong>
+            <span>{{ getFormattedTime(quiz()?.time) }}</span>
+          </div>
+        </div>
+      </mat-card-content>
+
+      <mat-divider></mat-divider>
+
+      <!-- Quiz Form with ReactiveFormsModule -->
+      <form [formGroup]="quizForm">
+        <div formArrayName="answers">
+          <!-- Current question display -->
+          @if (currentQuestion()) {
+          <div class="current-question">
+            <h3>
+              Question {{ currentQuestionIndex() + 1 }} of
+              {{ questions().length }}
+            </h3>
+
+            <!-- Fix question UI to trigger changes -->
+            <div class="question-content">
+              <p class="question-text">{{ currentQuestion()!.questionText }}</p>
+
+              <!-- Text input question - Add change detection triggers -->
+              @if (currentQuestion()!.type === 'TEXT') {
+              <div [formGroupName]="currentQuestionIndex()">
+                <mat-form-field class="full-width">
+                  <mat-label>Your Answer</mat-label>
+                  <input
+                    matInput
+                    formControlName="textAnswer"
+                    placeholder="Type your answer"
+                    (blur)="updateProgressValue()"
+                  />
+                </mat-form-field>
+              </div>
+              }
+
+              <!-- Single select question - Add change detection triggers -->
+              @if (currentQuestion()!.type === 'SINGLE') {
+              <div [formGroupName]="currentQuestionIndex()">
+                <mat-radio-group
+                  formControlName="selectedOptionId"
+                  class="option-radio-group"
+                  (change)="updateProgressValue()"
+                >
+                  @for (option of currentQuestion()!.options || []; track
+                  option.id) {
+                  <mat-radio-button
+                    [value]="option.id"
+                    class="option-radio-button"
+                  >
+                    {{ option.answerText }}
+                  </mat-radio-button>
+                  }
+                </mat-radio-group>
+              </div>
+              }
+
+              <!-- Multiple choice question - Add change detection triggers -->
+              @if (currentQuestion()!.type === 'MCQ') {
+              <div [formGroupName]="currentQuestionIndex()">
+                <div formGroupName="options" class="checkbox-options">
+                  @for (option of currentQuestion()!.options || []; track
+                  option.id) {
+                  <mat-checkbox
+                    [formControlName]="'option_' + option.id"
+                    class="option-checkbox"
+                    (change)="updateProgressValue()"
+                  >
+                    {{ option.answerText }}
+                  </mat-checkbox>
+                  }
+                </div>
+              </div>
+              }
+            </div>
+
+            <!-- Navigation buttons -->
+            <div class="question-navigation">
+              <button
+                mat-button
+                [disabled]="currentQuestionIndex() === 0"
+                (click)="goToPreviousQuestion()"
+              >
+                <mat-icon>navigate_before</mat-icon> Previous
+              </button>
+
+              <button
+                mat-raised-button
+                color="primary"
+                (click)="submitQuiz()"
+                *ngIf="showSubmitButton()"
+              >
+                Submit Quiz
+              </button>
+
+              <button
+                mat-button
+                [disabled]="currentQuestionIndex() === questions().length - 1"
+                (click)="goToNextQuestion()"
+              >
+                Next <mat-icon>navigate_next</mat-icon>
+              </button>
+            </div>
+          </div>
+          }
+        </div>
+      </form>
+
+      <!-- Question progress indicator -->
+      <mat-divider></mat-divider>
+      <div class="question-progress">
+        @for (question of questions(); track $index) {
+        <button
+          mat-mini-fab
+          [color]="isQuestionAnswered($index) ? 'primary' : 'basic'"
+          (click)="goToQuestion($index)"
+          [class.current]="currentQuestionIndex() === $index"
+        >
+          {{ $index + 1 }}
+        </button>
+        }
+      </div>
+    </mat-card>
+  </div>
+  }
+</div>

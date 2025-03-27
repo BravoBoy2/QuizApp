@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AdminService } from '../../Services/admin.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -43,7 +43,7 @@ export class ViewQuizComponent {
   quizId: number = 0;
   quiz: Quiz | null = null;  // Changed from any to Quiz
   questions: Question[] = []; // Changed from any[] to Question[]
-  loading: boolean = true;
+  loading = signal(true);
   error: string | null = null;
 
   // Filter properties
@@ -109,7 +109,7 @@ export class ViewQuizComponent {
   }
 
   loadQuizData(): void {
-    this.loading = true;
+    this.loading.set(true);
     this.adminService.getQuizQuestions(this.quizId).subscribe({
       next: (data: any) => {
         console.log('Complete API response:', JSON.stringify(data, null, 2));
@@ -148,12 +148,12 @@ export class ViewQuizComponent {
           this.questions = data.questions || [];
         }
 
-        this.loading = false;
+        this.loading.set(false);
       },
       error: (error) => {
         this.error = 'Failed to load quiz data.';
         console.error('Error loading quiz:', error);
-        this.loading = false;
+        this.loading.set(false);
         this.snackBar.open('Failed to load quiz. Please try again.', 'Close', {
           duration: 3000,
           verticalPosition: 'bottom'

@@ -1,12 +1,12 @@
 <div class="view-quiz-container">
   <!-- Loading indicator -->
-  <div *ngIf="loading" class="loading-container">
+  <div *ngIf="loading()" class="loading-container">
     <mat-spinner diameter="50"></mat-spinner>
     <p>Loading quiz content...</p>
   </div>
 
   <!-- Error display -->
-  <div *ngIf="!loading && error" class="error-container">
+  <div *ngIf="!loading() && error" class="error-container">
     <mat-card>
       <mat-card-content>
         <p class="error-message">{{ error }}</p>
@@ -18,7 +18,7 @@
   </div>
 
   <!-- Quiz content when loaded successfully -->
-  <div *ngIf="!loading && !error && quiz" class="quiz-content">
+  <div *ngIf="!loading()" class="quiz-content">
     <!-- Action bar -->
     <div class="actions-bar">
       <button mat-stroked-button color="primary" (click)="goBackToDashboard()">
@@ -44,9 +44,9 @@
         <div mat-card-avatar class="quiz-header-image">
           <mat-icon color="primary">quiz</mat-icon>
         </div>
-        <mat-card-title>{{ quiz.title || "Untitled Quiz" }}</mat-card-title>
+        <mat-card-title>{{ quiz?.title || "Untitled Quiz" }}</mat-card-title>
         <mat-card-subtitle>
-          {{ quiz.description || "No description provided" }}
+          {{ quiz?.description || "No description provided" }}
         </mat-card-subtitle>
       </mat-card-header>
 
@@ -59,7 +59,7 @@
           <div class="metadata-item">
             <strong>Time Limit:</strong>
             <!-- Use the formatting method for time display with the correct path -->
-            <span>{{ getFormattedTime(quiz.time) }}</span>
+            <span>{{ getFormattedTime(quiz?.time) }}</span>
           </div>
         </div>
       </mat-card-content>
