@@ -24,19 +24,37 @@
   <div class="quiz-content">
     <!-- Basic navigation -->
     <div class="actions-bar">
-      <button mat-stroked-button color="primary" (click)="goBackToDashboard()">
+      <button
+        mat-stroked-button
+        color="primary"
+        [disabled]="timeIsUp()"
+        (click)="goBackToDashboard()"
+      >
         <mat-icon>arrow_back</mat-icon> Back to Dashboard
       </button>
 
       <!-- Timer display -->
       @if (remainingTime() !== null && remainingTime() !== undefined) {
-      <div class="timer">Time left: {{ formatTime(remainingTime()!) }}</div>
+      <div class="timer" [class.time-critical]="remainingTime()! < 60">
+        Time left: {{ formatTime(remainingTime()!) }}
+      </div>
       }
     </div>
 
+    <!-- Time's up overlay -->
+    @if (timeIsUp()) {
+    <div class="time-up-overlay">
+      <div class="time-up-message">
+        <mat-icon color="warn">timer_off</mat-icon>
+        <h2>Time's Up!</h2>
+        <p>Your quiz is being submitted...</p>
+      </div>
+    </div>
+    }
+
     <!-- Progress Bar - Simplified implementation -->
     <div class="progress-container">
-      <div class="progress-label">
+      <mat-label class="progress-label">
         <span
           >Progress: <strong>{{ getProgressValue() }}%</strong></span
         >
@@ -44,7 +62,7 @@
           <strong>{{ getAnsweredCount() }}</strong> /
           {{ questions().length }} questions answered
         </span>
-      </div>
+      </mat-label>
       <mat-progress-bar
         [value]="getProgressValue()"
         [color]="getProgressColor()"
@@ -69,13 +87,15 @@
       <!-- Quiz metadata -->
       <mat-card-content>
         <div class="quiz-metadata">
-          <div class="metadata-item">
-            <strong>Questions:</strong> {{ questions().length }}
-          </div>
-          <div class="metadata-item">
-            <strong>Time Limit:</strong>
-            <span>{{ getFormattedTime(quiz()?.time) }}</span>
-          </div>
+          <mat-card-title-group class="metadata-item">
+            <mat-card-subtitle>Questions:  {{ questions().length }}</mat-card-subtitle>
+
+          <mat-card-subtitle class="metadata-item">
+            <mat-card-subtitle class="time-limit">Time Limit: <span> {{ getFormattedTime(quiz()?.time) }} </span></mat-card-subtitle>
+
+
+          </mat-card-subtitle>
+          </mat-card-title-group>
         </div>
       </mat-card-content>
 
@@ -155,7 +175,7 @@
             <div class="question-navigation">
               <button
                 mat-button
-                [disabled]="currentQuestionIndex() === 0"
+                [disabled]="currentQuestionIndex() === 0 || timeIsUp()"
                 (click)="goToPreviousQuestion()"
               >
                 <mat-icon>navigate_before</mat-icon> Previous
@@ -164,6 +184,7 @@
               <button
                 mat-raised-button
                 color="primary"
+                [disabled]="timeIsUp()"
                 (click)="submitQuiz()"
                 *ngIf="showSubmitButton()"
               >
@@ -172,7 +193,10 @@
 
               <button
                 mat-button
-                [disabled]="currentQuestionIndex() === questions().length - 1"
+                [disabled]="
+                  currentQuestionIndex() === questions().length - 1 ||
+                  timeIsUp()
+                "
                 (click)="goToNextQuestion()"
               >
                 Next <mat-icon>navigate_next</mat-icon>
@@ -191,6 +215,7 @@
           mat-mini-fab
           [color]="isQuestionAnswered($index) ? 'primary' : 'basic'"
           (click)="goToQuestion($index)"
+          [disabled]="timeIsUp()"
           [class.current]="currentQuestionIndex() === $index"
         >
           {{ $index + 1 }}

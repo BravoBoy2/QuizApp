@@ -118,6 +118,9 @@ export class InQuizComponent implements OnInit, OnDestroy {
     return isAnswered;
   }
 
+  // Add a new signal to track if time is up
+  timeIsUp = signal(false);
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -286,11 +289,31 @@ export class InQuizComponent implements OnInit, OnDestroy {
             this.remainingTime.update(time => (time ?? 0) - 1);
           } else {
             // Time's up - auto submit
-            this.submitQuiz();
+            this.timeIsUp.set(true);
+            this.handleTimeUp();
           }
         });
       }
     }
+  }
+
+  // New method to handle when time runs out
+  handleTimeUp(): void {
+    // Clean up timer subscription
+    if (this.timerSubscription) {
+      this.timerSubscription.unsubscribe();
+    }
+
+    // Show time's up message
+    this.snackBar.open('Time is up! Your quiz will be submitted automatically.', 'OK', {
+      duration: 5000,
+      panelClass: ['warn-snackbar']
+    });
+
+    // Wait a short moment to show the message before submitting
+    setTimeout(() => {
+      this.submitQuiz(true); // Pass flag to indicate auto-submission due to timeout
+    }, 1500);
   }
 
   formatTime(seconds: number): string {
@@ -384,14 +407,14 @@ export class InQuizComponent implements OnInit, OnDestroy {
   }
 
   // Quiz submission
-  submitQuiz(): void {
+  submitQuiz(isAutoSubmit: boolean = false): void {
     // Stop the timer if it's running
     if (this.timerSubscription) {
       this.timerSubscription.unsubscribe();
     }
 
-    // Show a confirmation dialog before submission
-    if (!confirm('Are you sure you want to submit this quiz?')) {
+    // Show a confirmation dialog before submission (only if not auto-submitted)
+    if (!isAutoSubmit && !confirm('Are you sure you want to submit this quiz?')) {
       return;
     }
 
@@ -538,5 +561,10 @@ export class InQuizComponent implements OnInit, OnDestroy {
     const percentage = Math.round((count / total) * 100);
     console.log(`Updating progress: ${count} / ${total} = ${percentage}%`);
     this.progressValue.set(percentage);
+  }
+
+  // Add a method to check if interaction is allowed
+  canInteract(): boolean {
+    return !this.timeIsUp() && !this.loading();
   }
 }

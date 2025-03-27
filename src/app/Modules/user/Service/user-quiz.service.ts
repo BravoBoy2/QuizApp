@@ -29,11 +29,20 @@ export class UserQuizService {
   submitQuiz(quizId: number, userId: number, answers: any[]): Observable<any> {
     // Format the answers to match our QuizSubmissionDTO structure
     const formattedAnswers = answers.map(answer => {
-      return {
-        questionId: answer.questionId,
-        textAnswer: answer.textAnswer || null,
-        selectedOptionIds: answer.selectedOptionIds || []
-      };
+      // Special handling for TEXT answers to ensure they're properly formatted
+      if (answer.textAnswer !== undefined && answer.textAnswer !== null) {
+        return {
+          questionId: answer.questionId,
+          textAnswer: answer.textAnswer.trim(), // Ensure text is trimmed
+          selectedOptionIds: answer.selectedOptionIds || []
+        };
+      } else {
+        return {
+          questionId: answer.questionId,
+          textAnswer: '',
+          selectedOptionIds: answer.selectedOptionIds || []
+        };
+      }
     });
 
     // Create the quiz submission object with the structure expected by our backend
