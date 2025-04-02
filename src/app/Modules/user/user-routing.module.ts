@@ -2,14 +2,15 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { DashboardComponent } from './Components/dashboard/dashboard.component';
 import { InQuizComponent } from './Components/in-quiz/in-quiz.component';
+import { ViewResultComponent } from './Components/view-result/view-result.component';
 import { QuizResultsComponent } from './Components/quiz-results/quiz-results.component';
-import { AllResultsComponent } from './Components/all-results/all-results.component';
+
 
 const routes: Routes = [
   { path: 'dashboard', component: DashboardComponent, title: 'Dashboard' },
-  { path: 'in-quiz/:id', component: InQuizComponent, title: 'Taking Quiz' },
+  { path: 'start-quiz/:id', component: InQuizComponent, title: 'Start Quiz' },
+  { path: 'view-results', component: ViewResultComponent, title: 'View Results' },
   { path: 'quiz-results/:id', component: QuizResultsComponent, title: 'Quiz Results' },
-  { path: 'results', component: AllResultsComponent, title: 'All Quiz Results' },
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
 ];
 

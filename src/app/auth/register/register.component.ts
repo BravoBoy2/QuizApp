@@ -33,8 +33,6 @@ export class RegisterComponent {
       this.authService.fetchData('register', this.registerForm.value)
         .subscribe( {
           next: (response: any) => {
-            console.log(response);
-
             //firing dialog based on the api calls
             this.dialog.open(DialogComponent, {
               data: {

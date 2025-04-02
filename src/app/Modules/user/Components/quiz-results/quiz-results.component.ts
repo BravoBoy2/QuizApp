@@ -9,7 +9,7 @@ import { MatProgressBarModule } from '@angular/material/progress-bar';
 
 @Component({
   selector: 'app-quiz-results',
-  standalone: true,
+  standalone: true, // Add standalone: true here
   imports: [
     CommonModule,
     MatCardModule,
@@ -98,7 +98,10 @@ export class QuizResultsComponent implements OnInit {
     private route: ActivatedRoute,
     private router: Router,
     private quizService: UserQuizService
-  ) {}
+  ) {
+    // Get the current user ID from localStorage
+    this.getCurrentUser();
+  }
 
   ngOnInit(): void {
     this.route.params.subscribe(params => {
@@ -107,10 +110,28 @@ export class QuizResultsComponent implements OnInit {
     });
   }
 
+  getCurrentUser(): void {
+    try {
+      const userData = localStorage.getItem('user');
+      if (userData) {
+        const user = JSON.parse(userData);
+        if (user && user.id) {
+          this.userId = user.id;
+          console.log('Using authenticated user ID from localStorage:', this.userId);
+          return;
+        }
+      }
+      console.log('No user found in localStorage, using default userId: 1');
+    } catch (error) {
+      console.error('Error retrieving user from localStorage:', error);
+    }
+  }
+
   loadQuizResult(): void {
     this.loading = true;
     this.quizService.getQuizResultsByQuiz(this.quizId).subscribe({
       next: (data) => {
+        console.log('Quiz result data received:', data);
         this.quizResult = data;
         this.loading = false;
       },
@@ -133,6 +154,8 @@ export class QuizResultsComponent implements OnInit {
   }
 
   viewAllResults(): void {
-    this.router.navigate(['/user/results']);
+    this.router.navigate(['/user/view-results']);
   }
 }
+
+

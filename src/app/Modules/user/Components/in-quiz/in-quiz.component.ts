@@ -43,7 +43,7 @@ export class InQuizComponent implements OnInit, OnDestroy {
   questions = signal<Question[]>([]);
   loading = signal(true);
   error = signal<string | null>(null);
-  userId: number = 1; // This should be set from authentication service
+  userId: number = 1; // Default to 1 as fallback
 
   // Question navigation
   currentQuestionIndex = signal(0);
@@ -75,6 +75,46 @@ export class InQuizComponent implements OnInit, OnDestroy {
 
   // Add a new signal to track progress
   progressValue = signal(0);
+
+  // Add a new signal to track if time is up
+  timeIsUp = signal(false);
+
+  constructor(
+    private route: ActivatedRoute,
+    private router: Router,
+    private quizService: UserQuizService,
+    private snackBar: MatSnackBar,
+    private fb: FormBuilder
+  ) {
+    // Initialize the user ID properly using localStorage
+    this.getCurrentUser();
+    console.log('Constructor: Using user ID:', this.userId);
+
+    // Initialize form
+    this.initializeForm();
+
+    // Handle route params
+    this.setupRouteParams();
+  }
+
+  // Helper methods to handle initialization that was previously in the constructor
+  initializeForm(): void {
+    this.quizForm = this.fb.group({
+      answers: this.fb.array([])
+    });
+
+    // Listen for value changes in the form to update progress
+    this.quizForm.valueChanges.subscribe(() => {
+      this.updateProgressValue();
+    });
+  }
+
+  setupRouteParams(): void {
+    this.route.params.subscribe(params => {
+      this.quizId = +params['id']; // Convert to number
+      this.loadQuizData();
+    });
+  }
 
   // Add this debugging method to be sure the value is calculated
   getProgressValue(): number {
@@ -118,43 +158,28 @@ export class InQuizComponent implements OnInit, OnDestroy {
     return isAnswered;
   }
 
-  // Add a new signal to track if time is up
-  timeIsUp = signal(false);
-
-  constructor(
-    private route: ActivatedRoute,
-    private router: Router,
-    private quizService: UserQuizService,
-    private snackBar: MatSnackBar,
-    private fb: FormBuilder
-  ) { }
-
   ngOnInit() {
-    this.quizForm = this.fb.group({
-      answers: this.fb.array([])
-    });
-
-    // Listen for value changes in the form to update progress
-    this.quizForm.valueChanges.subscribe(() => {
-      this.updateProgressValue();
-    });
-
-    this.route.params.subscribe(params => {
-      this.quizId = +params['id']; // Convert to number
-      this.loadQuizData();
-    });
-
-    // Get the currently logged in user's ID (ideally from an auth service)
-    this.getCurrentUser();
+    // No need to duplicate the initialization work that's already done in the constructor
   }
 
-  // Add method to get current user from your authentication service
+  // Method to get current user from localStorage
   getCurrentUser(): void {
-    // Ideally this would come from your auth service
-    // For example: this.userId = this.authService.getCurrentUser().id;
-
-    // For now, we'll use a placeholder user ID until auth is implemented
-    this.userId = 1; // Default user ID - replace with actual auth logic
+    try {
+      const userData = localStorage.getItem('user');
+      if (userData) {
+        const user = JSON.parse(userData);
+        if (user && user.id) {
+          this.userId = user.id;
+          console.log('Using authenticated user ID from localStorage:', this.userId);
+          return;
+        }
+      }
+      console.log('No user found in localStorage, using default userId: 1');
+      this.userId = 1; // Default to 1 if no user found
+    } catch (error) {
+      console.error('Error retrieving user from localStorage:', error);
+      this.userId = 1; // Default to 1 if there's an error
+    }
   }
 
   ngOnDestroy() {
@@ -173,8 +198,6 @@ export class InQuizComponent implements OnInit, OnDestroy {
     this.loading.set(true);
     this.quizService.getQuizQuestions(this.quizId).subscribe({
       next: (data: any) => {
-        // ...existing code for handling data...
-
         let quizData: Quiz | null = null;
         let questionList: Question[] = [];
 
@@ -297,7 +320,7 @@ export class InQuizComponent implements OnInit, OnDestroy {
     }
   }
 
-  // New method to handle when time runs out
+  // Method to handle when time runs out
   handleTimeUp(): void {
     // Clean up timer subscription
     if (this.timerSubscription) {
@@ -322,7 +345,7 @@ export class InQuizComponent implements OnInit, OnDestroy {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   }
 
-  // Add the missing getFormattedTime method
+  // Method to format time for display
   getFormattedTime(time: any): string {
     if (!time) return 'No time limit';
 
@@ -482,6 +505,9 @@ export class InQuizComponent implements OnInit, OnDestroy {
       userId: this.userId,
       answers: responses
     }, null, 2));
+
+    // Log the user ID being used for the submission
+    console.log(`Submitting quiz for user ID: ${this.userId}`);
 
     // Call the API with the correct user ID
     this.quizService.submitQuiz(this.quizId, this.userId, responses).subscribe({

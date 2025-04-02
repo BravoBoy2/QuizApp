@@ -121,7 +121,7 @@ export class DashboardComponent implements OnInit {
   }
 
   startQuiz(quizId: number): void {
-    this.router.navigate(['/user/in-quiz', quizId]);
+    this.router.navigate(['/user/start-quiz/', quizId]);
   }
 
   viewQuizDetails(quizId: number): void {
