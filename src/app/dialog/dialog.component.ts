@@ -24,6 +24,9 @@ import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
   styleUrl: './dialog.component.scss'
 })
 export class DialogComponent {
+formatJson(arg0: any) {
+throw new Error('Method not implemented.');
+}
   data = inject(MAT_DIALOG_DATA);
   // loading = contentChild<boolean>("loading");
 

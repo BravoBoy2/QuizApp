@@ -1,5 +1,35 @@
+.spinner-div {
+  display: flex;
+  align-items: center;
+  margin-left: 16px; /* Add some spacing between the text and the spinner */
+}
+
 .spinner {
   display: flex;
-  width: 0.5vw;
-  height: 0.5vh;
+  width: 0.7em;  /* Reduced width */
+  height: 0.7em; /* Reduced height */
+}
+
+.spinner mat-spinner {
+  width: 100%; /* Make the spinner fill the container */
+  height: 100%; /* Make the spinner fill the container */
+}
+
+mat-dialog-content {
+  padding: 16px; /* Add padding to the content area */
+}
+
+.content-container {
+  display: flex; /* Use flexbox to align content and spinner */
+  align-items: center; /* Vertically align items */
+  p {
+    margin-bottom: 8px; /* Add spacing below paragraphs */
+    margin-right: 16px; /* Add spacing to the right of the text */
+  }
+}
+
+mat-dialog-actions {
+  display: flex;
+  justify-content: flex-end; /* Align buttons to the right */
+  padding: 8px;
 }

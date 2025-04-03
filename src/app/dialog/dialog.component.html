@@ -1,20 +1,24 @@
-<h2 mat-dialog-title>{{data.title}}</h2> <br>
+<h2 mat-dialog-title>{{ data.title }}</h2>
+<br />
 <mat-dialog-content>
-  <p>{{data.message}}</p>
-
-  @if (data.loading){
+  <div class="content-container">
+    <p>{{ data.message }}</p>
+    @if (data.loading){
     <div class="spinner-div">
-    <mat-spinner class="spinner" mode="indeterminate">Loading...</mat-spinner>
+      <mat-spinner class="spinner" mode="indeterminate">Loading...</mat-spinner>
     </div>
-      }
+    }
+  </div>
+  @if (data.errorDetails) {
+  <details>
+    <summary>Error Details</summary>
+    <pre>{{ formatJson(data.errorDetails) }}</pre>
+  </details>
+  }
 </mat-dialog-content>
 
-
-  <mat-dialog-actions>
-    @if (data.title === "Error"){
-    <button mat-button matDialogClose>Try again</button>
-    }
-  </mat-dialog-actions>
-
-
-
+<mat-dialog-actions>
+  @if (data.title === "Error"){
+  <button mat-button matDialogClose>Try again</button>
+  }
+</mat-dialog-actions>

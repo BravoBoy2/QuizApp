@@ -29,6 +29,20 @@ form{
   display: flex;
   align-items: center;
   justify-content: space-evenly;
+
+  button {
+    transition: all 0.3s ease; /* Add a transition for a smooth effect */
+
+    &:hover {
+      transform: translateY(-2px); /* Move the button slightly up on hover */
+      box-shadow: 0 4px 6px rgba(128, 128, 128, 0.1); /* Add a subtle shadow */
+    }
+
+    &:active {
+      transform: translateY(0); /* Reset the position when active (clicked) */
+      box-shadow: none; /* Remove the shadow when active */
+    }
+  }
 }
 
 a{

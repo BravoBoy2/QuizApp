@@ -1,4 +1,4 @@
-import {Component, inject, signal} from '@angular/core';
+import {Component, inject, signal, AfterViewInit, ElementRef, ViewChild, HostListener} from '@angular/core';
 import {AuthModule} from '../auth.module';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {MatButton} from '@angular/material/button';
@@ -14,10 +14,11 @@ import {DialogComponent} from '../../dialog/dialog.component';
   templateUrl: './register.component.html',
   styleUrl: './register.component.scss'
 })
-export class RegisterComponent {
+export class RegisterComponent implements AfterViewInit {
   hide = signal(true);
   dialog = inject(MatDialog);
 
+  @ViewChild('registerButton') registerButton: ElementRef | undefined;
 
   registerForm = new FormGroup({
     name: new FormControl('', [Validators.required]),
@@ -26,6 +27,20 @@ export class RegisterComponent {
   });
 
   constructor(private authService: AuthService, private router: Router) {
+  }
+
+  ngAfterViewInit(): void {
+    if (this.registerButton) {
+      this.registerButton.nativeElement.focus();
+    }
+  }
+
+  @HostListener('document:keydown.enter', ['$event'])
+  onEnterKey(event: KeyboardEvent) {
+    event.preventDefault();
+    if (!this.dialog.openDialogs.length) { // Check if a dialog is open
+      this.onSubmit();
+    }
   }
 
   onSubmit() {
@@ -52,15 +67,20 @@ export class RegisterComponent {
 
           },
           error: ( error: any) =>{
-            console.log(error);
+            console.error('Registration error:', error); // Log the error
+
+            let errorMessage = 'An unexpected error occurred. Please try again.';
+            if (error.error && error.error.message) {
+              errorMessage = error.error.message; // Use the server message if available
+            }
 
             this.dialog.open(DialogComponent, {
               data: {
                 title : "Error",
-                message : error.error.message
+                message : "unexpected error occurred",
+                errorDetails: error // Pass the entire error object
               }
-            })
-
+            });
           }
         });
     }
