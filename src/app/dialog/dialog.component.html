@@ -18,8 +18,7 @@
 </mat-dialog-content>
 
 <mat-dialog-actions>
-  <button mat-button matDialogClose="false" *ngIf="data.showCancelButton">
-    Cancel
-  </button>
-  <button mat-raised-button color="warn" matDialogClose="true">Confirm</button>
+  @if (data.title === "Error"){
+  <button mat-button matDialogClose>Try again</button>
+  }
 </mat-dialog-actions>

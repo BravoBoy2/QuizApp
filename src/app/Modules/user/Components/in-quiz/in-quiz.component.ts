@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, signal, computed, HostListener } from '@angular/core';
+import { Component, OnInit, OnDestroy, signal, computed } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { UserQuizService } from '../../Service/user-quiz.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -16,9 +16,6 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { FormBuilder, FormGroup, FormControl, FormArray, ReactiveFormsModule } from '@angular/forms';
 import { interval, Subscription } from 'rxjs';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { QuitQuizDialogComponent } from './quit-quiz-dialog/quit-quiz-dialog.component';
-import { DialogComponent } from '../../../../dialog/dialog.component';
 
 @Component({
   selector: 'app-in-quiz',
@@ -35,8 +32,7 @@ import { DialogComponent } from '../../../../dialog/dialog.component';
     MatRadioModule,
     MatCheckboxModule,
     ReactiveFormsModule,
-    MatProgressBarModule,
-    MatDialogModule
+    MatProgressBarModule
   ],
   templateUrl: './in-quiz.component.html',
   styleUrls: ['./in-quiz.component.scss']
@@ -73,6 +69,7 @@ export class InQuizComponent implements OnInit, OnDestroy {
       if (this.checkIsQuestionAnswered(i)) answered++;
     }
 
+    console.log(`Progress calculation: ${answered}/${total} = ${(answered / total) * 100}%`);
     return (answered / total) * 100;
   });
 
@@ -87,57 +84,17 @@ export class InQuizComponent implements OnInit, OnDestroy {
     private router: Router,
     private quizService: UserQuizService,
     private snackBar: MatSnackBar,
-    private fb: FormBuilder,
-    private dialog: MatDialog // Inject MatDialog
+    private fb: FormBuilder
   ) {
     // Initialize the user ID properly using localStorage
     this.getCurrentUser();
+    console.log('Constructor: Using user ID:', this.userId);
 
     // Initialize form
     this.initializeForm();
 
     // Handle route params
     this.setupRouteParams();
-  }
-
-  // Listen for browser back or navigation events
-  @HostListener('window:beforeunload', ['$event'])
-  handleBrowserBack(event: BeforeUnloadEvent): void {
-    if (this.hasUnsavedProgress()) {
-      event.preventDefault(); // Prevent the default behavior
-      event.returnValue = ''; // Required for some browsers to show a confirmation dialog
-    }
-  }
-
-  // Check if there is unsaved progress
-  private hasUnsavedProgress(): boolean {
-    return this.answersArray.controls.some((control, index) =>
-      this.isQuestionAnswered(index)
-    );
-  }
-
-  // Handle navigation away from the quiz
-  navigateAway(): void {
-    if (this.hasUnsavedProgress()) {
-      const dialogRef = this.dialog.open(DialogComponent, {
-        width: '300px',
-        data: {
-          title: 'Confirm Navigation',
-          message: 'You have unsaved progress. Are you sure you want to leave the quiz?',
-          showCancelButton: true // Ensure the cancel button is shown
-        }
-      });
-
-      dialogRef.afterClosed().subscribe(result => {
-        if (result === true) {
-          // Navigate to the dashboard only if the user confirms
-          this.router.navigate(['/user/dashboard']);
-        }
-      });
-    } else {
-      // If no unsaved progress, navigate directly
-      this.router.navigate(['/user/dashboard']);
-    }
   }
 
   // Helper methods to handle initialization that was previously in the constructor
@@ -213,9 +170,11 @@ export class InQuizComponent implements OnInit, OnDestroy {
         const user = JSON.parse(userData);
         if (user && user.id) {
           this.userId = user.id;
+          console.log('Using authenticated user ID from localStorage:', this.userId);
           return;
         }
       }
+      console.log('No user found in localStorage, using default userId: 1');
       this.userId = 1; // Default to 1 if no user found
     } catch (error) {
       console.error('Error retrieving user from localStorage:', error);
@@ -495,6 +454,10 @@ export class InQuizComponent implements OnInit, OnDestroy {
         const rawTextAnswer = formGroup.get('textAnswer')?.value || '';
         const textAnswer = rawTextAnswer.trim();
 
+        console.log(`Question ${question.id} (TEXT): "${question.questionText}"`);
+        console.log(`Submitting answer: "${textAnswer}"`);
+        console.log(`Expected answer: "${question.correctAnswer}"`);
+
         return {
           questionId: question.id,
           selectedOptionIds: [], // Always empty array for TEXT questions
@@ -536,9 +499,20 @@ export class InQuizComponent implements OnInit, OnDestroy {
       };
     });
 
+    // Log the entire payload for debugging
+    console.log('Full submission payload:', JSON.stringify({
+      quizId: this.quizId,
+      userId: this.userId,
+      answers: responses
+    }, null, 2));
+
+    // Log the user ID being used for the submission
+    console.log(`Submitting quiz for user ID: ${this.userId}`);
+
     // Call the API with the correct user ID
     this.quizService.submitQuiz(this.quizId, this.userId, responses).subscribe({
       next: (result) => {
+        console.log('Quiz submission result:', result);
         this.loading.set(false);
         this.snackBar.open(`Quiz submitted successfully! You scored ${result.percentageCorrAnswer.toFixed(1)}%`, 'Close', {
           duration: 5000
@@ -564,7 +538,13 @@ export class InQuizComponent implements OnInit, OnDestroy {
   }
 
   goBackToDashboard(): void {
-    this.navigateAway(); // Use navigateAway to handle confirmation
+    // Show confirmation if answers have been entered
+    if (this.answersArray.controls.some((control, index) => this.isQuestionAnswered(index))) {
+      const confirm = window.confirm('Are you sure you want to exit? Your progress will be lost.');
+      if (!confirm) return;
+    }
+
+    this.router.navigate(['/user/dashboard']);
   }
 
   // Make this method more efficient
@@ -605,30 +585,12 @@ export class InQuizComponent implements OnInit, OnDestroy {
     }
 
     const percentage = Math.round((count / total) * 100);
+    console.log(`Updating progress: ${count} / ${total} = ${percentage}%`);
     this.progressValue.set(percentage);
   }
 
   // Add a method to check if interaction is allowed
   canInteract(): boolean {
     return !this.timeIsUp() && !this.loading();
-  }
-
-  // Method to handle quitting the quiz
-  quitQuiz(): void {
-    const dialogRef = this.dialog.open(DialogComponent, {
-      width: '300px',
-      data: {
-        title: 'Confirm Quit',
-        message: 'Are you sure you want to quit the quiz? Your progress will be lost.',
-        showCancelButton: true // Add a flag to show the cancel button
-      }
-    });
-
-    dialogRef.afterClosed().subscribe(result => {
-      if (result === true) {
-        // Terminate the session and navigate back to the dashboard
-        this.router.navigate(['/user/dashboard']);
-      }
-    });
   }
 }

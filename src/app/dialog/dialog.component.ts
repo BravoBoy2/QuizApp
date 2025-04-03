@@ -21,7 +21,7 @@ import {MatProgressSpinnerModule} from '@angular/material/progress-spinner';
     MatDialogTitle
   ],
   templateUrl: './dialog.component.html',
-  styleUrls: ['./dialog.component.scss']
+  styleUrl: './dialog.component.scss'
 })
 export class DialogComponent {
   // formatJson method to format JSON data for better readability
