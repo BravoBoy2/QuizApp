@@ -1,0 +1,16 @@
+.home-card {
+  max-width: 500px;
+  margin: 100px auto;
+  text-align: center;
+  padding: 20px;
+  opacity: 0; // Start with hidden state
+  transform: translateY(20px); // Start with slight downward offset
+  animation: fadeIn 0.8s ease-out forwards; // Apply fade-in animation
+}
+
+@keyframes fadeIn {
+  to {
+    opacity: 1; // Fully visible
+    transform: translateY(0); // Reset position
+  }
+}

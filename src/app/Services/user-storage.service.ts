@@ -6,91 +6,56 @@ import {UserRole} from '../Shared/UserRole';
   providedIn: 'root'
 })
 export class UserStorageService {
-  private readonly user = "user";
+  private readonly user = "user"; // Key used to store user data in localStorage
 
   constructor() { }
 
+  // Save user data to localStorage
   saveUser(user: User) {
     localStorage.setItem("user", JSON.stringify(user));
-
   }
 
-  getUser() : User | null{
-      const userString = localStorage.getItem(this.user);
-      if (userString) {
-        try {
-          return JSON.parse(userString);
-        } catch (error) {
-          console.error("Error parsing user data", error);
-          this.logOut();
-          return null;
-        }
+  // Retrieve user data from localStorage
+  getUser(): User | null {
+    const userString = localStorage.getItem(this.user);
+    if (userString) {
+      try {
+        return JSON.parse(userString); // Parse and return user data
+      } catch (error) {
+        console.error("Error parsing user data", error);
+        this.logOut(); // Log out if parsing fails
+        return null;
+      }
     }
-    return null;
+    return null; // Return null if no user data is found
   }
 
+  // Get the ID of the logged-in user
   getUserId(): number | null {
     const user = this.getUser();
     return user ? user.id : null;
   }
 
+  // Get the role of the logged-in user
   getUserRole(): UserRole | null {
     const user = this.getUser();
     return user ? user.role : null;
   }
 
-  logOut() : void {
+  // Log out the user by removing user data from localStorage
+  logOut(): void {
     localStorage.removeItem("user");
   }
 
+  // Check if the logged-in user is an admin
   isAdmin(): boolean {
     return this.getUserRole() === "ADMIN";
   }
 
+  // Check if the logged-in user is a regular user
   isUser(): boolean {
     return this.getUserRole() === "USER";
   }
 
-
-
-
-
-
-//   static saveUser (user: any) {
-//     localStorage.removeItem(USER);
-//     localStorage.setItem(USER, JSON.stringify(user));
-//   }
-//
-//   static getUser(){
-//     return JSON.parse(localStorage.getItem(USER));
-//   }
-//
-//   static getUserId() : number {
-//     const user = this.getUser();
-//     if(user == null){
-//       return 0;
-//     }
-//     return user.id;
-//   }
-//
-//   static getUserRole(): string {
-//     const user = this.getUser();
-//     if(user == null){
-//       return '';
-//     }
-//     return user.role;
-// }
-//
-// static isAdmin() : boolean {
-//   return this.getUserRole() === "ADMIN";
-// }
-//
-//
-//   static isUser() : boolean {
-//     return this.getUserRole() === "USER";
-//   }
-//
-//   static logOut() : void {
-//     localStorage.removeItem(USER);
-//   }
+  // ...existing commented-out code...
 }
