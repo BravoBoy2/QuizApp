@@ -28,7 +28,7 @@
         mat-stroked-button
         color="primary"
         [disabled]="timeIsUp()"
-        (click)="goBackToDashboard()"
+        (click)="navigateAway()"
       >
         <mat-icon>arrow_back</mat-icon> Back to Dashboard
       </button>
@@ -39,6 +39,9 @@
         Time left: {{ formatTime(remainingTime()!) }}
       </div>
       }
+      <button mat-stroked-button color="warn" (click)="quitQuiz()">
+        Quit Quiz
+      </button>
     </div>
 
     <!-- Time's up overlay -->
@@ -88,13 +91,18 @@
       <mat-card-content>
         <div class="quiz-metadata">
           <mat-card-title-group class="metadata-item">
-            <mat-card-subtitle>Questions:  {{ questions().length }}</mat-card-subtitle>
+            <mat-card-subtitle
+              >Questions: {{ questions().length }}</mat-card-subtitle
+            >
 
-          <mat-card-subtitle class="metadata-item">
-            <mat-card-subtitle class="time-limit">Time Limit: <span> {{ getFormattedTime(quiz()?.time) }} </span></mat-card-subtitle>
-
-
-          </mat-card-subtitle>
+            <mat-card-subtitle class="metadata-item">
+              <mat-card-subtitle class="time-limit"
+                >Time Limit:
+                <span>
+                  {{ getFormattedTime(quiz()?.time) }}
+                </span></mat-card-subtitle
+              >
+            </mat-card-subtitle>
           </mat-card-title-group>
         </div>
       </mat-card-content>
