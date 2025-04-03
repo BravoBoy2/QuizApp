@@ -30,15 +30,22 @@ import {DialogComponent} from '../dialog/dialog.component';
   ]
 })
 export class NavigationComponent {
+  // Breakpoint observer to check screen size
   private breakpointObserver = inject(BreakpointObserver);
 
+  // Boolean to check if user is logged in
   isUserLoggedIn: boolean = false;
+  // Boolean to check if admin is logged in
   isAdminLoggedIn: boolean = false;
+  // Inject user storage service
   userStorage = inject(UserStorageService);
+  // Inject dialog service
   dialog = inject(MatDialog);
 
+  // Constructor for the navigation component
   constructor(private router: Router) {}
 
+  // Lifecycle hook called after component initialization
   ngOnInit() {
     this.router.events.subscribe(event => {
       this.isUserLoggedIn = this.userStorage.isUser();
@@ -46,6 +53,7 @@ export class NavigationComponent {
     })
   }
 
+  // Method to log out the user
   logout() {
     this.dialog.open(DialogComponent, {
       data: {
@@ -61,6 +69,7 @@ export class NavigationComponent {
 
   }
 
+  // Observable to check if the screen is a handset
   isHandset$: Observable<boolean> = this.breakpointObserver.observe(Breakpoints.Handset)
     .pipe(
       map(result => result.matches),
