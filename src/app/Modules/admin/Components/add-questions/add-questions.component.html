@@ -1,112 +1,225 @@
 <div class="container mat-elevation-z2">
   <h2>Add Questions to Quiz</h2>
 
-  <form [formGroup]="addQuestion" (ngSubmit)="onSubmit()">
-    <!-- Question Text -->
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Question</mat-label>
-      <textarea matInput formControlName="questionText" rows="3"></textarea>
-      <mat-hint>Enter the question text</mat-hint>
-      @if (addQuestion.get('questionText')?.errors?.['required'] &&
-      addQuestion.get('questionText')?.touched) {
-      <mat-error>Question is required</mat-error>
-      } @if (addQuestion.get('questionText')?.errors?.['minlength'] &&
-      addQuestion.get('questionText')?.touched) {
-      <mat-error>Question must be at least 6 characters</mat-error>
-      }
-    </mat-form-field>
+  <div class="questions-container">
+    @for (form of questionForms; track $index) {
+    <mat-card
+      class="question-card"
+      [class.expanded]="expandedQuestionIndex === $index"
+    >
+      <mat-card-header
+        class="question-header"
+        (click)="setExpandedIndex($index)"
+      >
+        <mat-card-title>
+          Question {{ $index + 1 }} @if (form.get('questionText')?.value) { :
+          {{ form.get("questionText")?.value | slice : 0 : 30
+          }}{{ form.get("questionText")?.value.length > 30 ? "..." : "" }}
+          }
+        </mat-card-title>
+        <div class="question-actions">
+          @if (questionForms.length > 1) {
+          <button
+            mat-icon-button
+            color="warn"
+            (click)="removeQuestion($index); $event.stopPropagation()"
+          >
+            <mat-icon>delete</mat-icon>
+          </button>
+          }
+          <mat-icon>{{
+            expandedQuestionIndex === $index ? "expand_less" : "expand_more"
+          }}</mat-icon>
+        </div>
+      </mat-card-header>
 
-    <!-- Question Type -->
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Question Type</mat-label>
-      <mat-select formControlName="type">
-        @for (type of questionTypes; track type.value) {
-        <mat-option [value]="type.value">{{ type.display }}</mat-option>
-        }
-      </mat-select>
-      <mat-hint>Select the type of question</mat-hint>
-    </mat-form-field>
+      @if (expandedQuestionIndex === $index) {
+      <mat-card-content class="question-content">
+        <form [formGroup]="form">
+          <!-- Question Text -->
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Question</mat-label>
+            <textarea
+              matInput
+              formControlName="questionText"
+              rows="3"
+            ></textarea>
+            <mat-hint>Enter the question text</mat-hint>
+            @if (form.get('questionText')?.errors?.['required'] &&
+            form.get('questionText')?.touched) {
+            <mat-error>Question is required</mat-error>
+            } @else if (form.get('questionText')?.errors?.['minlength'] &&
+            form.get('questionText')?.touched) {
+            <mat-error>Question must be at least 6 characters</mat-error>
+            }
+          </mat-form-field>
 
-    <!-- Text Input Question Type (correct answer) -->
-    @if (addQuestion.get('type')?.value === 'TEXT') {
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Correct Answer</mat-label>
-      <input matInput formControlName="correctAnswer" />
-      <mat-hint>Enter the expected answer</mat-hint>
-      @if (addQuestion.get('correctAnswer')?.errors?.['required'] &&
-      addQuestion.get('correctAnswer')?.touched) {
-      <mat-error>Correct answer is required</mat-error>
+          <!-- Question Type -->
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Question Type</mat-label>
+            <mat-select formControlName="type">
+              @for (type of questionTypes; track type.value) {
+              <mat-option [value]="type.value">{{ type.display }}</mat-option>
+              }
+            </mat-select>
+            <mat-hint>Select the type of question</mat-hint>
+          </mat-form-field>
+
+          <!-- Text Input Question Type (correct answer) -->
+          @if (form.get('type')?.value === 'TEXT') {
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Correct Answer</mat-label>
+            <input matInput formControlName="correctAnswer" />
+            <mat-hint>Enter the expected answer</mat-hint>
+            @if (form.get('correctAnswer')?.errors?.['required'] &&
+            form.get('correctAnswer')?.touched) {
+            <mat-error>Correct answer is required</mat-error>
+            }
+          </mat-form-field>
+          }
+
+          <!-- MCQ and Single Select Options -->
+          @if (form.get('type')?.value !== 'TEXT') {
+          <div formArrayName="options" class="options-container">
+            <h3>
+              @switch (form.get('type')?.value) { @case ('MCQ') { Options (Check
+              all correct answers) } @case ('SINGLE') { Options (Select one
+              correct answer) } }
+            </h3>
+
+            @for (option of getOptions(form).controls; track $index) {
+            <div
+              [formGroupName]="$index"
+              class="option-row"
+              [class.selected]="option.get('isCorrect')?.value"
+            >
+              @if (form.get('type')?.value === 'SINGLE') {
+              <!-- Improved radio button with better handling -->
+              <div class="radio-like-container">
+                <mat-radio-button
+                  [checked]="option.get('isCorrect')?.value === true"
+                  (click)="selectOption(form, $index)"
+                  color="primary"
+                  class="radio-option"
+                  [attr.aria-label]="'Select option ' + ($index + 1)"
+                ></mat-radio-button>
+              </div>
+              } @else {
+              <!-- Regular checkbox for MCQ -->
+              <mat-checkbox formControlName="isCorrect"></mat-checkbox>
+              }
+
+              <!-- Improved text input with better event handling -->
+              <mat-form-field appearance="outline" class="option-input">
+                <mat-label>Option {{ $index + 1 }}</mat-label>
+                <input
+                  type="text"
+                  matInput
+                  [value]="option.get('answerText')?.value"
+                  (input)="updateOptionText(form, $index, $event)"
+                  (blur)="form.updateValueAndValidity()"
+                />
+                @if (!option.get('answerText')?.value &&
+                option.get('answerText')?.touched) {
+                <mat-error>Option text is required</mat-error>
+                }
+              </mat-form-field>
+              @if (getOptions(form).length > 2) {
+              <button
+                type="button"
+                mat-icon-button
+                color="warn"
+                (click)="removeOption(form, $index)"
+              >
+                <mat-icon>delete</mat-icon>
+              </button>
+              }
+            </div>
+            }
+            <button
+              type="button"
+              mat-stroked-button
+              color="primary"
+              (click)="addOption(form)"
+            >
+              <mat-icon>add</mat-icon> Add Option
+            </button>
+          </div>
+          }
+        </form>
+      </mat-card-content>
       }
-    </mat-form-field>
+    </mat-card>
     }
 
-    <!-- MCQ and Single Select Options -->
-    @if (addQuestion.get('type')?.value !== 'TEXT') {
-    <div formArrayName="options" class="options-container">
-      <h3>
-        @switch (addQuestion.get('type')?.value) { @case ('MCQ') { Options
-        (Check all correct answers) } @case ('SINGLE') { Options (Select one
-        correct answer) } }
-      </h3>
-
-      @for (option of options.controls; track $index) {
-      <div [formGroupName]="$index" class="option-row">
-        @if (addQuestion.get('type')?.value === 'SINGLE') {
-        <!-- Use radio behavior for SINGLE -->
-        <mat-checkbox
-          formControlName="isCorrect"
-          (change)="onOptionSelect($index)"
-        >
-        </mat-checkbox>
-        } @else {
-        <!-- Regular checkbox for MCQ -->
-        <mat-checkbox formControlName="isCorrect"></mat-checkbox>
-        }
-
-        <mat-form-field appearance="outline" class="option-input">
-          <mat-label>Option {{ $index + 1 }}</mat-label>
-          <input type="text" matInput formControlName="answerText" />
-          @if (option.get('answerText')?.errors?.['required'] &&
-          option.get('answerText')?.touched) {
-          <mat-error>Option text is required</mat-error>
-          }
-        </mat-form-field>
-        @if (options.length > 2) {
-        <button
-          type="button"
-          mat-icon-button
-          color="warn"
-          (click)="removeOption($index)"
-        >
-          <mat-icon>delete</mat-icon>
-        </button>
-        }
-      </div>
-      }
+    <div class="add-question-button">
       <button
         type="button"
         mat-stroked-button
         color="primary"
-        (click)="addOption()"
+        (click)="addNewQuestion()"
       >
-        <mat-icon>add</mat-icon> Add Option
+        <mat-icon>add</mat-icon> Add New Question
       </button>
     </div>
-    }
 
-    <!-- Buttons -->
+    <!-- Submit Buttons -->
     <div class="action-buttons">
       <button type="button" mat-stroked-button (click)="finish()">
-        Finish
+        Cancel
       </button>
       <button
-        type="submit"
+        type="button"
         mat-raised-button
         color="primary"
-        [disabled]="!addQuestion.valid"
+        (click)="onSubmit()"
+        [disabled]="!areAllFormsValid()"
       >
-        Save Question
+        Save All Questions
       </button>
     </div>
-  </form>
+
+    <!-- Optional: Debug panel that uses methods that exist in the component -->
+    <!-- Uncomment this for debugging if needed -->
+    <!--
+    <div class="debug-info">
+      <h4>Debug Info</h4>
+      @if (questionForms.length > 0 && expandedQuestionIndex < questionForms.length) {
+        <p>
+          Current question type:
+          {{ questionForms[expandedQuestionIndex].get("type")?.value }}
+        </p>
+        <p>Form valid: {{ questionForms[expandedQuestionIndex].valid }}</p>
+        <p>
+          Has correct option:
+          {{ hasValidOptions(questionForms[expandedQuestionIndex]) }}
+        </p>
+      }
+      <p>All forms valid: {{ areAllFormsValid() }}</p>
+    </div>
+    -->
+  </div>
+
+  <!-- Replace or update your debug panel -->
+  <div
+    class="debug-info"
+    style="
+      margin-top: 20px;
+      padding: 10px;
+      background-color: #f5f5f5;
+      border: 1px solid #ddd;
+    "
+  >
+    <h4>Form Debug</h4>
+    @if (questionForms.length > 0) {
+    <div *ngFor="let form of questionForms; let i = index">
+      <p>
+        Question {{ i + 1 }} ({{ form.get("type")?.value }}): Valid:
+        {{ form.valid }} | Has correct: {{ hasAnyCorrectOption(form) }} |
+        Options valid: {{ hasValidOptions(form) }}
+      </p>
+    </div>
+    <p><strong>All forms valid:</strong> {{ areAllFormsValid() }}</p>
+    }
+  </div>
 </div>

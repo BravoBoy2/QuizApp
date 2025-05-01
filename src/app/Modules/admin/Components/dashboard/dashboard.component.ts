@@ -23,7 +23,6 @@ export interface Quiz {
   selector: 'app-dashboard',
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss',
-  standalone: true,
   imports: [
     AsyncPipe,
     MatGridListModule,

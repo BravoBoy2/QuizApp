@@ -1,26 +1,84 @@
 <div class="grid-container">
-  <h1 class="mat-h1">Dashboard</h1>
-  <mat-grid-list cols="2" rowHeight="350px">
-    @for (card of cards | async; track card) {
-      <mat-grid-tile [colspan]="card.cols" [rowspan]="card.rows">
-        <mat-card class="dashboard-card">
-          <mat-card-header>
-            <mat-card-title>
-              {{card.title}}
-              <button mat-icon-button class="more-button" [matMenuTriggerFor]="menu" aria-label="Toggle menu">
-                <mat-icon>more_vert</mat-icon>
+  <h1 class="mat-h1">Available Quizzes</h1>
+
+  <!-- Loading indicator - updated to use signal() -->
+  @if (loading()) {
+  <div class="loading-container">
+    <p>Loading quizzes...</p>
+  </div>
+  }
+
+  <!-- Error message -->
+  @if (error) {
+  <div class="error-container">
+    <p>{{ error }}</p>
+    <button mat-raised-button color="primary" (click)="getAllQuizzes()">
+      Try Again
+    </button>
+  </div>
+  }
+
+  <!-- No quizzes message - updated to use loading() -->
+  @if (!loading() && !error && Quizzes.length === 0) {
+  <div class="empty-container">
+    <p>No quizzes available at the moment.</p>
+  </div>
+  }
+
+  <!-- Quizzes grid -->
+  @if (Quizzes.length > 0) {
+  <mat-grid-list [cols]="cols" rowHeight="350px">
+    @for (quiz of Quizzes; track quiz.id) {
+    <mat-grid-tile [colspan]="quiz.cols" [rowspan]="quiz.rows">
+      <mat-card class="dashboard-card">
+        <mat-card-header>
+          <mat-card-title>
+            {{ quiz.title }}
+            <button
+              mat-icon-button
+              class="more-button"
+              [matMenuTriggerFor]="menu"
+              aria-label="Toggle menu"
+            >
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #menu="matMenu" xPosition="before">
+              <button mat-menu-item (click)="viewQuizDetails(quiz.id)">
+                <mat-icon>info</mat-icon>
+                <span>View Details</span>
               </button>
-              <mat-menu #menu="matMenu" xPosition="before">
-                <button mat-menu-item>Expand</button>
-                <button mat-menu-item>Remove</button>
-              </mat-menu>
-            </mat-card-title>
-          </mat-card-header>
-          <mat-card-content class="dashboard-card-content">
-            <div>Card Content Here</div>
-          </mat-card-content>
-        </mat-card>
-      </mat-grid-tile>
+              <button mat-menu-item (click)="startQuiz(quiz.id)">
+                <mat-icon>play_arrow</mat-icon>
+                <span>Start Quiz</span>
+              </button>
+            </mat-menu>
+          </mat-card-title>
+        </mat-card-header>
+        <mat-card-content class="dashboard-card-content">
+          <div class="quiz-info">
+            <p class="quiz-description">
+              {{ quiz.description || "No description available" }}
+            </p>
+            <div class="quiz-meta">
+              <p><strong>Time:</strong> {{ quiz.formattedTime }}</p>
+              @if (quiz.questions && quiz.questions.length > 0) {
+              <p><strong>Questions:</strong> {{ quiz.questions.length }}</p>
+              }
+            </div>
+          </div>
+        </mat-card-content>
+        <mat-card-actions>
+          <button
+            mat-raised-button
+            color="primary"
+            (click)="startQuiz(quiz.id)"
+          >
+            START QUIZ
+          </button>
+        </mat-card-actions>
+      </mat-card>
+    </mat-grid-tile>
     }
   </mat-grid-list>
+  }
 </div>

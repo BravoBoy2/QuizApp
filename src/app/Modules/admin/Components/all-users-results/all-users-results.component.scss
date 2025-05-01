@@ -1,0 +1,93 @@
+.results-container {
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.loading-indicator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+
+  p {
+    margin-top: 16px;
+    font-size: 16px;
+  }
+}
+
+.no-data {
+  text-align: center;
+  padding: 40px 20px;
+
+  p {
+    margin-bottom: 20px;
+    font-size: 18px;
+  }
+}
+
+.filter-container {
+  margin-bottom: 20px;
+
+  mat-form-field {
+    width: 100%;
+  }
+}
+
+.results-table {
+  width: 100%;
+}
+
+.score-cell {
+  display: flex;
+  flex-direction: column;
+  width: 120px;
+
+  mat-progress-bar {
+    margin-top: 5px;
+  }
+}
+
+.admin-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 20px;
+  gap: 12px;
+}
+
+.summary {
+  margin-top: 20px;
+  text-align: right;
+  font-weight: 500;
+
+  p {
+    margin: 5px 0;
+  }
+}
+
+mat-card-actions {
+  display: flex;
+  justify-content: space-between;
+}
+
+.table-container {
+  overflow-x: auto;
+}
+
+h1 {
+  color: #3f51b5;
+  margin-bottom: 20px;
+}
+
+// Add more styles for the admin theme
+.mat-mdc-row {
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.02);
+  }
+}
+
+// Style for alternating rows
+.mat-mdc-row:nth-child(even) {
+  background-color: rgba(0, 0, 0, 0.01);
+}

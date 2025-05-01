@@ -1,4 +1,4 @@
-import {Component, inject, signal} from '@angular/core';
+import {Component, inject, signal, HostListener} from '@angular/core';
 import {AuthModule} from '../auth.module';
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {AuthService} from '../auth.service';
@@ -28,6 +28,13 @@ loginForm = new FormGroup({
 
 constructor(private authService : AuthService, private router : Router) { }
 
+@HostListener('document:keydown.enter', ['$event'])
+onEnterKey(event: KeyboardEvent) {
+  event.preventDefault();
+  if (!this.dialog.openDialogs.length) {
+    this.onSubmit();
+  }
+}
 
   onSubmit() {
   if (this.loginForm.valid) {
@@ -63,13 +70,20 @@ constructor(private authService : AuthService, private router : Router) { }
       console.log(response);
     },
     error: (error: any) => {
-        this.dialog.open(DialogComponent,
-           { data : {
-          title: 'Error',
-            message : error.error.message
-           },
-           });
-        console.log(error);
+        console.error('Login error:', error); // Log the error
+
+        let errorMessage = 'An unexpected error occurred. Please try again.';
+        if (error.error && error.error.message) {
+          errorMessage = error.error.message; // Use the server message if available
+        }
+
+          this.dialog.open(DialogComponent,
+             { data : {
+            title: 'Error',
+              message : "email or password is incorrect",
+               errorDetails: error // Pass the entire error object
+             },
+             });
     }
   })
   }

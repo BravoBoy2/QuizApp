@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { Quiz, Question } from './quiz';
+import { Observable, of } from 'rxjs';
+import { catchError, tap } from 'rxjs/operators';
+import { Quiz, Question } from '../../../Shared/quiz';
 
 @Injectable({
   providedIn: 'root'
@@ -35,5 +36,39 @@ export class AdminService {
   getAllQuizzes() : Observable<any>{
     const url = `${this.baseUrl}/quiz`;
     return this.http.get(url);
+  }
+  getQuizQuestions(quizId: number) : Observable<any>{
+    return this.http.get(`${this.baseUrl}/quiz/${quizId}`);
+  }
+
+  // Get quiz results for all users
+  getAllQuizResults(): Observable<any> {
+    return this.http.get(`${this.baseUrl}/quiz-submissions/results`).pipe(
+      tap(results => console.log('Retrieved all quiz results:', results)),
+      catchError(error => {
+        console.error('Error fetching all quiz results:', error);
+        return of([]); // Return empty array on error
+      })
+    );
+  }
+
+  // Get results for specific user
+  getUserResults(userId: number): Observable<any> {
+    return this.http.get(`${this.baseUrl}/quiz-submissions/results/user/${userId}`).pipe(
+      catchError(error => {
+        console.error(`Error fetching results for user ${userId}:`, error);
+        return of([]);
+      })
+    );
+  }
+
+  // Get results for specific quiz
+  getQuizResults(quizId: number): Observable<any> {
+    return this.http.get(`${this.baseUrl}/quiz-submissions/results/quiz/${quizId}`).pipe(
+      catchError(error => {
+        console.error(`Error fetching results for quiz ${quizId}:`, error);
+        return of([]);
+      })
+    );
   }
 }

@@ -11,7 +11,7 @@
                 <mat-icon>more_vert</mat-icon>
               </button>
               <mat-menu #menu="matMenu" xPosition="before">
-                <button mat-menu-item>Expand</button>
+                <button mat-menu-item routerLink="/admin/view-quiz/{{quiz.id}}">Expand</button>
                 <button mat-menu-item>Remove</button>
                 <button mat-menu-item routerLink="/admin/add-questions/{{quiz.id}}">Add Question </button>
               </mat-menu>
